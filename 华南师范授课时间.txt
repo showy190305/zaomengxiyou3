@@ -1,0 +1,63 @@
+华南师范授课时间表
+7月13-17日全天 授课作息时间：
+上午8：30 - 11：50 
+下午14：00 - 17:10
+
+1.设计游戏的架构 完成
+2.准备开始开发 团队开发
+  架构完成。
+  分包-分java开发包
+按功能模块进行开发包的划分：
+显示功能包  界面
+com.tedu.show 
+控制：主线程，监听
+com.tedu.controller
+模型：所有的元素类
+com.tedu.element
+元素管理器   管理器，加载器  工厂模式
+com.tedu.manager
+配置文件-游戏配置
+com.tedu.text
+游戏启动   启动游戏
+com.tedu.game
+图片音乐
+image
+
+
+
+
+名字要求：   3班 某某某
+
+
+飞机大战配置文件
+名词解释： 飞机类型 匹配一种飞机。例如 这个飞机是 左边出来 后边消失
+直接放入到  map的enemylist中      list中 按 time属性排序
+给飞机类型一个开关，这个开机是否已经激活
+飞机类型1=img:x,y,time,daojuname;x,y,time;x,y,time,null;x,y,time;x,y,time;x,y,time;
+飞机类型2=img:x,y,time;x,y,time;x,y,time;x,y,time;x,y,time;x,y,time;
+飞机类型3=img:x,y,time;x,y,time;x,y,time;x,y,time;x,y,time;x,y,time;
+飞机类型4=img:x,y,time;x,y,time;x,y,time;x,y,time;x,y,time;x,y,time;
+daojuname1=img
+
+1.图片加载。
+2.切图显示，和显示算法
+   可以掏空框架啦。。。
+3.反射在java中的应用
+4.利用collactions 进行对象排序。java中的对象排序。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

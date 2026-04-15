@@ -1,0 +1,1 @@
+paopao=image/Done_body16001_walk.png
