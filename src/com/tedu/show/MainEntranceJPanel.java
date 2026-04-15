@@ -6,6 +6,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -64,24 +65,44 @@ public class MainEntranceJPanel extends JPanel {
 	}
 
 	private void handleClick(int x, int y) {
-		if (x >= START_BTN_X && x <= START_BTN_X + START_BTN_W
-				&& y >= START_BTN_Y && y <= START_BTN_Y + START_BTN_H) {
+		if (x >= START_BTN_X && x <= START_BTN_X + START_BTN_W && y >= START_BTN_Y && y <= START_BTN_Y + START_BTN_H) {
 			if (gamePanel == null) return;
-			GameJFrame frame = (GameJFrame) getTopLevelAncestor();
-			// 移除菜单面板，换上游戏面板
-			JPanel jp = (JPanel) frame.getComponent(0);
-			frame.remove(jp);
 
+			// 获取窗口对象
+			GameJFrame frame = (GameJFrame) getTopLevelAncestor();
+
+			// 移除菜单面板，换上游戏面板
+			frame.getContentPane().removeAll();
+			for (KeyListener kl : frame.getKeyListeners()) {
+				frame.removeKeyListener(kl);
+			}
+
+			// 4. 手动“注入”并配置游戏面板
 			frame.setLayout(new BorderLayout());
 			frame.add(gamePanel, BorderLayout.CENTER);
+
+			// 5. 如果游戏面板需要键盘控制，手动添加监听
+			if (gamePanel instanceof KeyListener) {
+				frame.addKeyListener((KeyListener) gamePanel);
+			}
+
+			// 6. 调用刷新（不调用这个，界面不会变）
 			frame.revalidate();
 			frame.repaint();
 
-			// 启动渲染线程
-			Thread renderThread = new Thread(gamePanel);
-			renderThread.start();
-			System.out.println("渲染线程已启动");
+			// 7. 手动启动线程（对应你 JFrame 里的 start 逻辑）
+			if (gamePanel instanceof Runnable) {
+				Thread renderThread = new Thread((Runnable) gamePanel);
+				renderThread.start();
+				System.out.println("游戏逻辑线程已启动");
+			}
+
+			// 8. 强行让游戏面板获取焦点（不加这句，键盘控制会失效）
+			gamePanel.setFocusable(true);
+			gamePanel.requestFocusInWindow();
+
 			return;
+
 		}
 		if (x >= EXIT_BTN_X && x <= EXIT_BTN_X + EXIT_BTN_W
 				&& y >= EXIT_BTN_Y && y <= EXIT_BTN_Y + EXIT_BTN_H) {
