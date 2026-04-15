@@ -4,6 +4,7 @@ import com.tedu.controller.GameListener;
 import com.tedu.controller.GameThread;
 import com.tedu.show.GameJFrame;
 import com.tedu.show.GameMainJPanel;
+import com.tedu.show.MainEntranceJPanel;
 
 public class GameStart {
 	/**
@@ -11,14 +12,17 @@ public class GameStart {
 	 */
 	public static void main(String[] args) {
 		GameJFrame gj=new GameJFrame();
-		/**实例化面板，注入到jframe中*/
+		/**实例化游戏面板*/
 		GameMainJPanel jp=new GameMainJPanel();	
+		/**实例化菜单面板*/
+		MainEntranceJPanel menuPanel = new MainEntranceJPanel();
+		menuPanel.setGameMainPanel(jp);
 //		实例化监听
 		GameListener listener=new GameListener();
 //		实例化主线程
 		GameThread th=new GameThread();
-//		注入
-		gj.setjPanel(jp);
+//		注入菜单面板
+		gj.setjPanel(menuPanel);
 		gj.setKeyListener(listener);
 		gj.setThead(th);
 		
