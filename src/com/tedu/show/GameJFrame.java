@@ -90,10 +90,6 @@ public class GameJFrame extends JFrame{
 	public void setThead(Thread thead) {
 		this.thead = thead;
 	}
-	
-	
-	
-	
 }
 
 
