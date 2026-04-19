@@ -4,28 +4,38 @@ import com.tedu.controller.GameListener;
 import com.tedu.controller.GameThread;
 import com.tedu.show.GameJFrame;
 import com.tedu.show.GameMainJPanel;
+import com.tedu.show.MainEntranceJPanel;
+import com.tedu.login.LoginFrame;
+import com.tedu.login.PlayerSave;
+import com.tedu.login.LoginSuccessListener;
+
+import javax.swing.*;
 
 public class GameStart {
 	/**
 	 * 程序的唯一入口
 	 */
 	public static void main(String[] args) {
-		GameJFrame gj=new GameJFrame();
-		/**实例化面板，注入到jframe中*/
-		GameMainJPanel jp=new GameMainJPanel();	
-//		实例化监听
-		GameListener listener=new GameListener();
-//		实例化主线程
-		GameThread th=new GameThread();
-//		注入
-		gj.setjPanel(jp);
-		gj.setKeyListener(listener);
-		gj.setThead(th);
-		
-		gj.start();
-		
+		SwingUtilities.invokeLater(() -> {
+            // 弹出登录窗口，登录成功后回调
+            LoginFrame loginFrame = new LoginFrame((PlayerSave save) -> {
+                // 登录成功后，显示游戏主菜单面板
+                GameJFrame gj = new GameJFrame();
+                MainEntranceJPanel menuPanel = new MainEntranceJPanel();
+                menuPanel.setPlayerSave(save); // 传递存档
+                
+                // 设置游戏主面板供后续切换使用
+                GameMainJPanel gameMainPanel = new GameMainJPanel();
+                menuPanel.setGameMainPanel(gameMainPanel);
+                
+                // 只设置面板，不设置监听器和线程，直到用户选择开始游戏
+                gj.setjPanel(menuPanel);
+                gj.add(menuPanel); // 直接添加菜单面板
+                gj.setVisible(true); // 只显示界面，不启动游戏线程
+            });
+            loginFrame.setVisible(true); // 构造方法已设置可见，无需重复
+        });
 	}
-
 }
 
 /**
@@ -38,19 +48,3 @@ public class GameStart {
  * 
  * web网页游戏
  */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
