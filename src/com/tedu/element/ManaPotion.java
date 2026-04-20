@@ -15,14 +15,17 @@ public class ManaPotion extends Item {
 	public ManaPotion() {
 		super();
 		this.value = DEFAULT_MANA;
+		this.setIcon(new ImageIcon("image/item/mana.png"));
 	}
 	
 	public ManaPotion(int x, int y, int w, int h, ImageIcon icon, int value) {
 		super(x, y, w, h, icon, value);
+		this.setIcon(new ImageIcon("image/item/mana.png"));
 	}
 	
 	public ManaPotion(int x, int y) {
 		super(x, y, 30, 30, null, DEFAULT_MANA);
+		this.setIcon(new ImageIcon("image/item/mana.png"));
 	}
 	
 	@Override
