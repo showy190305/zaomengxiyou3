@@ -13,6 +13,17 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 
 public class WuKong extends ElementObj {
+        // 跳跃前的动作
+        private String jumpPrevAction = null;
+        // 跳跃时的移动速度
+        private int jumpMoveStep = 0;
+        // 跳跃相关
+        private boolean isJumping = false; // 是否正在跳跃
+        private double jumpSpeed = 0;      // 当前y轴速度
+        private double jumpInitSpeed = 30; // 跳跃初始速度（向上为正）
+        private double gravity = -3;     // 重力加速度（每帧减少速度）
+        private int jumpStartY = 0;        // 跳跃起始y坐标
+        private boolean jumpDirectionUp = true; // 跳跃方向，true为正常，false为反转
     // 攻击动作锁定
     private boolean attackLock = false;
     // 攻击动作记忆性计数
@@ -124,7 +135,6 @@ public class WuKong extends ElementObj {
         if (attackLock) {
             return;
         }
-        // --- J键逻辑 ---
         if (key == 'J' || key == 'j') {
             if (bl) {
                 if (!attackLock) {
@@ -137,19 +147,48 @@ public class WuKong extends ElementObj {
                 checkIdleState();
             }
         }
+        // --- K键逻辑（跳跃）---
+        else if (key == 'K' || key == 'k') {
+            if (bl) {
+                // 跳跃中不响应
+                if (!isJumping && !attackLock) {
+                    isJumping = true;
+                    jumpSpeed = jumpInitSpeed;
+                    jumpStartY = this.getY();
+                    jumpDirectionUp = true;
+                    // 跳跃时记录移动速度和前置动作
+                    if ("run".equals(currentAction)) {
+                        jumpMoveStep = runStep;
+                        jumpPrevAction = "run";
+                    } else if ("walk".equals(currentAction)) {
+                        jumpMoveStep = walkStep;
+                        jumpPrevAction = "walk";
+                    } else {
+                        jumpMoveStep = 0;
+                        jumpPrevAction = null;
+                    }
+                    setAction("up");
+                }
+            } else {
+                // 松开k键不做处理
+            }
+        }
         // --- A键逻辑 ---
         else if (key == 'A' || key == 'a') {
             if (bl) { // 按下
                 aPressed = true;
                 isLeft = true;
-                // 只在未奔跑时判断超时
-                if (!"run".equals(currentAction) && aClickCount == 1 && (currentTime - lastAReleaseTime > DOUBLE_CLICK_TIMEOUT)) {
-                    aClickCount = 0;
-                }
-                if (aClickCount == 1) {
-                    setAction("run");
-                } else {
-                    setAction("walk");
+                // 跳跃中只移动，不切换动作
+                if (!isJumping) {
+                    // 只在未奔跑时判断超时
+                    if (!"run".equals(currentAction) && aClickCount == 1 && (currentTime - lastAReleaseTime > DOUBLE_CLICK_TIMEOUT)) {
+                        aClickCount = 0;
+                    }
+                    if (aClickCount == 1) {
+                        setAction("run");
+                    } else {
+                        setAction("walk");
+                    }
                 }
             } else { // 松开
                 aPressed = false;
@@ -160,7 +199,9 @@ public class WuKong extends ElementObj {
                 if ("run".equals(currentAction)) {
                     aClickCount = 0;
                 }
-                checkIdleState();
+                if (!isJumping) {
+                    checkIdleState();
+                }
             }
         }
         // --- D键逻辑 ---
@@ -168,13 +209,18 @@ public class WuKong extends ElementObj {
             if (bl) { // 按下
                 dPressed = true;
                 isLeft = false;
-                if (!"run".equals(currentAction) && dClickCount == 1 && (currentTime - lastDReleaseTime > DOUBLE_CLICK_TIMEOUT)) {
-                    dClickCount = 0;
-                }
-                if (dClickCount == 1) {
-                    setAction("run");
+                // 跳跃中只移动，不切换动作，且反转上下方向
+                if (isJumping) {
+                    jumpDirectionUp = !jumpDirectionUp;
                 } else {
-                    setAction("walk");
+                    if (!"run".equals(currentAction) && dClickCount == 1 && (currentTime - lastDReleaseTime > DOUBLE_CLICK_TIMEOUT)) {
+                        dClickCount = 0;
+                    }
+                    if (dClickCount == 1) {
+                        setAction("run");
+                    } else {
+                        setAction("walk");
+                    }
                 }
             } else { // 松开
                 dPressed = false;
@@ -184,7 +230,9 @@ public class WuKong extends ElementObj {
                 if ("run".equals(currentAction)) {
                     dClickCount = 0;
                 }
-                checkIdleState();
+                if (!isJumping) {
+                    checkIdleState();
+                }
             }
         }
     }
@@ -249,13 +297,6 @@ public class WuKong extends ElementObj {
         List<Integer> downFrames = new ArrayList<>();
         downFrames.add(21);
         actionGroups.put("down", downFrames);
-        
-        // 翻滚动作: 帧25-29
-        List<Integer> rollFrames = new ArrayList<>();
-        for (int i = 25; i <= 29; i++) {
-            rollFrames.add(i);
-        }
-        actionGroups.put("roll", rollFrames);
         
         // 打击动作1: 帧30-34
         List<Integer> attack1Frames = new ArrayList<>();
@@ -367,6 +408,58 @@ public class WuKong extends ElementObj {
         long currentTime = System.currentTimeMillis();
         boolean canMove = (currentTime - lastMoveTime >= MOVE_INTERVAL);
 
+        // 跳跃逻辑
+        if (isJumping) {
+            if (canMove) {
+                lastMoveTime = currentTime;
+                // 跳跃方向控制
+                double dir = jumpDirectionUp ? 1 : -1;
+                // y轴坐标变化
+                int newY = (int) (this.getY() - jumpSpeed * dir);
+                this.setY(newY);
+                // 速度递减
+                jumpSpeed += gravity;
+                // 判断方向
+                if ((jumpSpeed > 0 && jumpDirectionUp) || (jumpSpeed < 0 && !jumpDirectionUp)) {
+                    setAction("up");
+                } else {
+                    setAction("down");
+                }
+                // 跳跃结束条件
+                boolean reachGround = false;
+                if (jumpDirectionUp) {
+                    if (this.getY() >= jumpStartY) {
+                        reachGround = true;
+                    }
+                } else {
+                    if (this.getY() <= jumpStartY) {
+                        reachGround = true;
+                    }
+                }
+                if (reachGround) {
+                    this.setY(jumpStartY);
+                    isJumping = false;
+                    jumpSpeed = 0;
+                    jumpMoveStep = 0;
+                    // 跳跃结束后恢复前置动作和移动
+                    if (jumpPrevAction != null) {
+                        setAction(jumpPrevAction);
+                    } else {
+                        setAction("idle");
+                    }
+                    jumpPrevAction = null;
+                }
+            }
+            // 跳跃中允许左右移动，但不切换动作，速度保持跳跃前状态
+            if (aPressed && canMove) {
+                this.setX(this.getX() - jumpMoveStep);
+            }
+            if (dPressed && canMove) {
+                this.setX(this.getX() + jumpMoveStep);
+            }
+            return;
+        }
+
         // 奔跑状态下不自动清零点击次数，只有在未奔跑时才清零
         if (!"run".equals(currentAction)) {
             if (aClickCount == 1 && (currentTime - lastAReleaseTime > DOUBLE_CLICK_TIMEOUT)) {
@@ -377,7 +470,7 @@ public class WuKong extends ElementObj {
             }
         }
 
-        if (canMove && (("walk".equals(currentAction) || "run".equals(currentAction)) && (aPressed || dPressed))) {
+        if (!attackLock && canMove && (("walk".equals(currentAction) || "run".equals(currentAction)) && (aPressed || dPressed))) {
             lastMoveTime = currentTime;
             List<Integer> actionFrames = actionGroups.get(currentAction);
             if (actionFrames != null && !actionFrames.isEmpty()) {
@@ -385,15 +478,15 @@ public class WuKong extends ElementObj {
                 this.currentFrame = actionFrames.get(currentActionFrameIndex);
             }
             if ("walk".equals(currentAction)) {
-                if (isLeft) {
+                if (aPressed && isLeft) {
                     this.setX(this.getX() - walkStep);
-                } else {
+                } else if (dPressed && !isLeft) {
                     this.setX(this.getX() + walkStep);
                 }
             } else if ("run".equals(currentAction)) {
-                if (isLeft) {
+                if (aPressed && isLeft) {
                     this.setX(this.getX() - runStep);
-                } else {
+                } else if (dPressed && !isLeft) {
                     this.setX(this.getX() + runStep);
                 }
             }
