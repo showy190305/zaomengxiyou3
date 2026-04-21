@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.tedu.element.ElementObj;
+import com.tedu.element.InventoryPanel;
 import com.tedu.manager.ElementManager;
 import com.tedu.manager.GameElement;
 
@@ -17,6 +18,7 @@ import com.tedu.manager.GameElement;
  */
 public class GameListener implements KeyListener{
 	private ElementManager em=ElementManager.getManager();
+	private InventoryPanel inventoryPanel;
 	
 	/*能否通过一个集合来记录所有按下的键，如果重复触发，就直接结束
 	 * 同时，第1次按下，记录到集合中，第2次判定集合中否有。
@@ -25,6 +27,10 @@ public class GameListener implements KeyListener{
 	 * */
 	private Set<Integer> set=new HashSet<Integer>();
 	
+	public void setInventoryPanel(InventoryPanel inventoryPanel) {
+		this.inventoryPanel = inventoryPanel;
+	}
+
 	@Override
 	public void keyTyped(KeyEvent e) {
 	}
@@ -37,6 +43,15 @@ public class GameListener implements KeyListener{
 //		拿到玩家集合
 		System.out.println("按下"+e.getKeyCode());
 		int key=e.getKeyCode();
+		
+		// B键切换背包显示
+		if (key == 'B' || key == 'b') {
+			if (inventoryPanel != null) {
+				inventoryPanel.toggleVisibility();
+			}
+			return;
+		}
+		
 		if(set.contains(key)) { //判定集合中是否已经存在,包含这个对象
 //			如果包含直接结束方法
 			return;

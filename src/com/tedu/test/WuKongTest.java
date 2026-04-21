@@ -41,21 +41,21 @@ public class WuKongTest extends JPanel implements KeyListener {
     
     @Override
     protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        
         // 绘制背景信息
         g.setColor(Color.WHITE);
         g.setFont(new Font("Arial", Font.PLAIN, 16));
         g.drawString("WuKong & Weapon Test - 使用 A/D 键移动，J 键攻击", 10, 30);
         g.drawString("A: 左移, D: 右移, J: 攻击", 10, 50);
         g.drawString("双击A/D可跑步", 10, 70);
-        
+
         // 显示悟空当前动作
         try {
             Field field = WuKong.class.getDeclaredField("currentAction");
             field.setAccessible(true);
             String currentAction = (String) field.get(wukong);
-            g.drawString("悟空当前动作: " + currentAction, 10, 90);
+            g.drawString("悟空当
+        super.paintComponent(g);
+        前动作: " + currentAction, 10, 90);
         } catch (Exception e) {
             g.drawString("悟空当前动作: unknown", 10, 90);
         }

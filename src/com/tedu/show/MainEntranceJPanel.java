@@ -158,6 +158,9 @@ public class MainEntranceJPanel extends JPanel {
 				frame.setKeyListener(listener);
 				frame.addKeyListener(listener);
 				
+				// 绑定背包面板到监听器
+				listener.setInventoryPanel(newGamePanel.getInventoryPanel());
+				
 				// 创建并设置新的游戏线程
 				com.tedu.controller.GameThread thread = new com.tedu.controller.GameThread();
 				frame.setThead(thread);
@@ -199,6 +202,9 @@ public class MainEntranceJPanel extends JPanel {
 						com.tedu.controller.GameListener listener = new com.tedu.controller.GameListener();
 						frame.setKeyListener(listener);
 						frame.addKeyListener(listener);
+						
+						// 绑定背包面板到监听器
+						listener.setInventoryPanel(newGamePanel.getInventoryPanel());
 						
 						// 创建并设置新的游戏线程
 						com.tedu.controller.GameThread thread = new com.tedu.controller.GameThread();

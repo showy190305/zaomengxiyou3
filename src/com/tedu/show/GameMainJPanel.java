@@ -3,6 +3,8 @@ package com.tedu.show;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -11,6 +13,10 @@ import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
 import com.tedu.element.ElementObj;
+import com.tedu.element.Inventory;
+import com.tedu.element.InventoryPanel;
+import com.tedu.element.PickupDetector;
+import com.tedu.element.WuKong;
 import com.tedu.manager.ElementManager;
 import com.tedu.manager.GameElement;
 
@@ -28,12 +34,70 @@ public class GameMainJPanel extends JPanel implements Runnable{
 //	联动管理器
 	private ElementManager em;
 	
+	// 背包相关
+	private InventoryPanel inventoryPanel;
+	private PickupDetector pickupDetector;
+	
 	public GameMainJPanel() {
 		init();
 	}
 
 	public void init() {
 		em = ElementManager.getManager();//得到元素管理器对象
+		
+		// 初始化背包系统
+		pickupDetector = new PickupDetector();
+		
+		// 添加鼠标监听，转发点击到背包面板
+		addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (inventoryPanel != null && inventoryPanel.isVisible()) {
+					inventoryPanel.handleClick(e.getX(), e.getY());
+					repaint();
+				}
+			}
+		});
+	}
+	
+	/**
+	 * 获取背包面板，供 GameListener 绑定
+	 */
+	public InventoryPanel getInventoryPanel() {
+		if (inventoryPanel == null) {
+			// 延迟初始化，需要玩家对象就绪后才创建
+			WuKong player = getPlayer();
+			if (player != null) {
+				inventoryPanel = new InventoryPanel(player);
+				// 设置面板大小与游戏面板一致
+				inventoryPanel.setSize(getWidth(), getHeight());
+			}
+		}
+		return inventoryPanel;
+	}
+	
+	/**
+	 * 获取当前玩家对象
+	 */
+	private WuKong getPlayer() {
+		List<ElementObj> players = em.getElementsByKey(GameElement.PLAY);
+		if (players != null && !players.isEmpty()) {
+			ElementObj obj = players.get(0);
+			if (obj instanceof WuKong) {
+				return (WuKong) obj;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * 执行拾取检测（由 GameThread 调用）
+	 */
+	public void updatePickup() {
+		WuKong player = getPlayer();
+		if (player != null && pickupDetector != null) {
+			pickupDetector.detectAndPickup(player);
+		}
 	}
 	/**
 	 * paint方法是进行绘画元素。
@@ -66,6 +130,11 @@ public class GameMainJPanel extends JPanel implements Runnable{
 //				obj.showElement(g);//调用每个类的自己的show方法完成自己的显示
 //			}
 //		}
+		
+		// 绘制背包面板（覆盖层）
+		if (inventoryPanel != null && inventoryPanel.isVisible()) {
+			inventoryPanel.paintComponent(g);
+		}
 		
 	}
 	@Override

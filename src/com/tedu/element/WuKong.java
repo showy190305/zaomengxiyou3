@@ -74,11 +74,16 @@ public class WuKong extends ElementObj {
     // 记忆当前动作的帧索引
     private int currentActionFrameIndex = 0; // 当前动作中播放到第几帧
 
+    // 背包
+    private Inventory inventory;
+
     public WuKong() {
         // 初始化图像帧
         loadSprites();
         // 初始化动作分组
         initializeActionGroups();
+        // 初始化背包
+        this.inventory = Inventory.getInstance();
     // ...existing code...
     }
     
@@ -599,5 +604,9 @@ public class WuKong extends ElementObj {
     
     public void setMaxMp(int maxMp) {
         this.maxMp = maxMp;
+    }
+
+    public Inventory getInventory() {
+        return inventory;
     }
 }

@@ -71,6 +71,9 @@ public class GameThread extends Thread{
 			ElementPK(enemys,files);
 			ElementPK(files,maps);
 			
+			// 拾取检测
+			pickupUpdate();
+			
 			gameTime++;//唯一的时间控制
 			try {
 				sleep(10);//默认理解为 1秒刷新100次 
@@ -129,6 +132,20 @@ public class GameThread extends Thread{
 	/**游戏切换关卡*/
 	private void gameOver() {
 		
+	}
+	
+	/**
+	 * 拾取检测
+	 */
+	private void pickupUpdate() {
+		List<ElementObj> players = em.getElementsByKey(GameElement.PLAY);
+		if (players == null || players.isEmpty()) return;
+		
+		com.tedu.element.PickupDetector detector = new com.tedu.element.PickupDetector();
+		com.tedu.element.ElementObj playerObj = players.get(0);
+		if (playerObj instanceof com.tedu.element.WuKong) {
+			detector.detectAndPickup((com.tedu.element.WuKong) playerObj);
+		}
 	}
 	
 }
