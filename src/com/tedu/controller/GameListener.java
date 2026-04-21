@@ -10,6 +10,7 @@ import com.tedu.element.ElementObj;
 import com.tedu.element.InventoryPanel;
 import com.tedu.manager.ElementManager;
 import com.tedu.manager.GameElement;
+import com.tedu.show.GameMainJPanel;
 
 /**
  * @说明 监听类，用于监听用户的操作 KeyListener
@@ -19,6 +20,7 @@ import com.tedu.manager.GameElement;
 public class GameListener implements KeyListener {
     private ElementManager em = ElementManager.getManager();
     private InventoryPanel inventoryPanel;
+    private GameMainJPanel gamePanel;
     
     /*能否通过一个集合来记录所有按下的键，如果重复触发，就直接结束
      * 同时，第1次按下，记录到集合中，第2次判定集合中否有。
@@ -29,6 +31,10 @@ public class GameListener implements KeyListener {
     
     public void setInventoryPanel(InventoryPanel inventoryPanel) {
         this.inventoryPanel = inventoryPanel;
+    }
+
+    public void setGamePanel(GameMainJPanel gamePanel) {
+        this.gamePanel = gamePanel;
     }
 
     @Override
@@ -45,8 +51,14 @@ public class GameListener implements KeyListener {
         
         // B键切换背包显示
         if (key == 'B' || key == 'b') {
+            if (inventoryPanel == null && gamePanel != null) {
+                inventoryPanel = gamePanel.getInventoryPanel();
+            }
             if (inventoryPanel != null) {
                 inventoryPanel.toggleVisibility();
+                if (gamePanel != null) {
+                    gamePanel.repaint();
+                }
             }
             return;
         }

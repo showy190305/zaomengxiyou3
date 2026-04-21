@@ -68,10 +68,16 @@ public class GameMainJPanel extends JPanel implements Runnable{
             if (player != null) {
                 inventoryPanel = new InventoryPanel(player);
                 // 设置面板大小与游戏面板一致
-                inventoryPanel.setSize(getWidth(), getHeight());
+                syncInventoryPanelSize();
             }
         }
         return inventoryPanel;
+    }
+
+    public void syncInventoryPanelSize() {
+        if (inventoryPanel != null) {
+            inventoryPanel.setSize(getWidth(), getHeight());
+        }
     }
     
     /**
@@ -106,6 +112,8 @@ public class GameMainJPanel extends JPanel implements Runnable{
     @Override  //用于绘画的    Graphics 画笔 专门用于绘画的
     public void paint(Graphics g) {
         super.paint(g);  //调用父类的paint方法
+        getInventoryPanel();
+        syncInventoryPanelSize();
         Map<GameElement, List<ElementObj>> all = em.getGameElements();
         for(GameElement ge:GameElement.values()) {
             List<ElementObj> list = all.get(ge);

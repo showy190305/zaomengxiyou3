@@ -46,18 +46,19 @@ public abstract class Item extends ElementObj {
 	 */
 	@Override
 	public void showElement(Graphics g) {
+		int screenX = this.getX() + MapObj.bgOffsetX;
 		if (this.getIcon() != null) {
 			// 如果有贴图则使用贴图
 			g.drawImage(this.getIcon().getImage(),
-					this.getX(), this.getY(),
+					screenX, this.getY(),
 					this.getW(), this.getH(), null);
 		} else {
 			// 没有贴图时使用彩色几何图形作为占位
 			g.setColor(getItemColor());
-			g.fillOval(this.getX(), this.getY(), this.getW(), this.getH());
+			g.fillOval(screenX, this.getY(), this.getW(), this.getH());
 			// 绘制边框
 			g.setColor(Color.WHITE);
-			g.drawOval(this.getX(), this.getY(), this.getW(), this.getH());
+			g.drawOval(screenX, this.getY(), this.getW(), this.getH());
 		}
 	}
 	

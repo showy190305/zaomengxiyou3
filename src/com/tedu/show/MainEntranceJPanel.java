@@ -136,8 +136,8 @@ public class MainEntranceJPanel extends JPanel {
         
         GameMainJPanel newGamePanel = new GameMainJPanel();
         com.tedu.controller.GameListener listener = new com.tedu.controller.GameListener();
+        listener.setGamePanel(newGamePanel);
         frame.setKeyListener(listener);
-        frame.addKeyListener(listener);
         
         // 绑定背包面板到监听器
         listener.setInventoryPanel(newGamePanel.getInventoryPanel());

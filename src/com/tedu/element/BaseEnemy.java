@@ -42,6 +42,7 @@ public abstract class BaseEnemy extends ElementObj {
 
     public int invincibleTimer = 0; 
     public int attackCooldown = 0;  
+    private boolean dropGenerated = false;
 
     // ==========================================================
     // 2. 以下逻辑（受击、渲染、AI）一字未改，直接原样搬过来
@@ -256,5 +257,13 @@ public abstract class BaseEnemy extends ElementObj {
 
     public String getCurrentAction() {
         return this.currentAction;
+    }
+
+    public boolean isDropGenerated() {
+        return dropGenerated;
+    }
+
+    public void markDropGenerated() {
+        this.dropGenerated = true;
     }
 }

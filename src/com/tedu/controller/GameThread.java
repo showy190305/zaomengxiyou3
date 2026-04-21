@@ -2,10 +2,16 @@ package com.tedu.controller;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import javax.swing.ImageIcon;
 
+import com.tedu.element.BaseEnemy;
+import com.tedu.element.BloodPotion;
 import com.tedu.element.ElementObj;
+import com.tedu.element.Inventory;
+import com.tedu.element.Item;
+import com.tedu.element.ManaPotion;
 import com.tedu.element.WuKong;
 import com.tedu.manager.ElementManager;
 import com.tedu.manager.GameElement;
@@ -16,6 +22,7 @@ import com.tedu.manager.GameLoad;
  * 游戏判定；游戏地图切换 资源释放和重新读取。。。
  */
 public class GameThread extends Thread {
+    private static final Random DROP_RANDOM = new Random();
     private ElementManager em;
     public static boolean isGameRunning = true;
     private boolean isPortalSpawned = false;
@@ -45,6 +52,7 @@ public class GameThread extends Thread {
     public void initGame() {
         // A. 强制清空上一局残留
         em.clearAll(); 
+        Inventory.getInstance().clear();
         
         // B. 重置本线程内的逻辑开关
         this.isPortalSpawned = false; 
@@ -146,7 +154,10 @@ public class GameThread extends Thread {
                 if (obj instanceof com.tedu.element.enemy2) {
                     com.tedu.element.enemy2 enemy = (com.tedu.element.enemy2) obj;
                     
-                    if (enemy.hp <= 0) continue; 
+                    if (enemy.hp <= 0) {
+                        handleEnemyDrop(enemy);
+                        continue;
+                    }
 
                     java.awt.Rectangle enemyBox = new java.awt.Rectangle(
                         enemy.getX() + 30, enemy.getY() + 30, enemy.getW() - 60, enemy.getH() - 60
@@ -177,6 +188,8 @@ public class GameThread extends Thread {
                             }
                         }
                     }
+
+                    handleEnemyDrop(enemy);
                 }
             }
         }
@@ -282,5 +295,22 @@ public class GameThread extends Thread {
         if (playerObj instanceof com.tedu.element.WuKong) {
             detector.detectAndPickup((com.tedu.element.WuKong) playerObj);
         }
+    }
+
+    private void handleEnemyDrop(BaseEnemy enemy) {
+        if (enemy == null || enemy.hp > 0 || enemy.isDropGenerated()) {
+            return;
+        }
+
+        Item drop = createRandomPotion(enemy);
+        em.addElement(drop, GameElement.ITEM);
+        enemy.markDropGenerated();
+        System.out.println("怪物掉落: " + drop.getClass().getSimpleName());
+    }
+
+    private Item createRandomPotion(BaseEnemy enemy) {
+        int dropX = enemy.getX() + enemy.getW() / 2 - 15;
+        int dropY = enemy.getY() + enemy.getH() - 40;
+        return DROP_RANDOM.nextBoolean() ? new BloodPotion(dropX, dropY) : new ManaPotion(dropX, dropY);
     }
 }
