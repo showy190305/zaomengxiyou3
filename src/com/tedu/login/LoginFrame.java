@@ -247,7 +247,11 @@ public class LoginFrame extends JFrame {
     }
 
     // 进入游戏主场景（与现有框架衔接）
+    // 进入游戏主场景（与现有框架衔接）
     private void enterGame(PlayerSave save) {
+        // 【核心截胡】：在进入游戏前，直接把存档塞进 GameLoad 的静态口袋里！
+        com.tedu.manager.GameLoad.currentSave = save;
+        
         // 登录窗口关闭
         this.dispose();
         // 回调通知GameStart
