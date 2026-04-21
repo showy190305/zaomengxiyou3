@@ -61,6 +61,12 @@ public class WuKong extends ElementObj {
     private int walkStep = 3; // 行走时每帧移动的距离
     private int runStep = 9;  // 奔跑时每帧移动的距离
 
+    // 生命值(HP)和魔法值(MP)
+    private int maxHp = 100;
+    private int hp = 100;
+    private int maxMp = 50;
+    private int mp = 50;
+
     // 添加移动频率控制
     private long lastMoveTime = 0;
     private static final long MOVE_INTERVAL = 100; // 0.1秒移动间隔
@@ -544,5 +550,54 @@ public class WuKong extends ElementObj {
     // 获取所有动作名称
     public List<String> getAllActionNames() {
         return new ArrayList<>(actionGroups.keySet());
+    }
+    
+    /**
+     * 恢复HP
+     * @param value 恢复的数值
+     */
+    public void recoverHp(int value) {
+        this.hp = Math.min(this.hp + value, maxHp);
+    }
+    
+    /**
+     * 恢复MP
+     * @param value 恢复的数值
+     */
+    public void recoverMp(int value) {
+        this.mp = Math.min(this.mp + value, maxMp);
+    }
+    
+    // HP/MP 相关 getter/setter
+    public int getHp() {
+        return hp;
+    }
+    
+    public void setHp(int hp) {
+        this.hp = Math.min(hp, maxHp);
+    }
+    
+    public int getMaxHp() {
+        return maxHp;
+    }
+    
+    public void setMaxHp(int maxHp) {
+        this.maxHp = maxHp;
+    }
+    
+    public int getMp() {
+        return mp;
+    }
+    
+    public void setMp(int mp) {
+        this.mp = Math.min(mp, maxMp);
+    }
+    
+    public int getMaxMp() {
+        return maxMp;
+    }
+    
+    public void setMaxMp(int maxMp) {
+        this.maxMp = maxMp;
     }
 }
