@@ -10,8 +10,8 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import com.tedu.element.WuKong;
-import com.tedu.element.Inventory.BloodPotion;
-import com.tedu.element.Inventory.ManaPotion;
+import com.tedu.element.BloodPotion;
+import com.tedu.element.ManaPotion;
 
 /**
  * 道具测试类

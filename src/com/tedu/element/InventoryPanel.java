@@ -22,6 +22,13 @@ public class InventoryPanel extends JPanel {
     private final WuKong player;
     private boolean visible = false;
 
+    // Cached sprite sheets for preview
+    private java.awt.image.BufferedImage wukongSprite;
+    private java.awt.image.BufferedImage armorSprite;
+    private java.awt.image.BufferedImage weaponSprite;
+    private java.awt.image.BufferedImage staffSprite;
+    private boolean spritesLoaded = false;
+
     private final Rectangle leftPanelRect = new Rectangle();
     private final Rectangle rightPanelRect = new Rectangle();
     private final Rectangle previewRect = new Rectangle();
@@ -186,21 +193,101 @@ public class InventoryPanel extends JPanel {
         g2.setColor(new Color(198, 164, 106));
         g2.drawRoundRect(previewRect.x, previewRect.y, previewRect.width, previewRect.height, 18, 18);
 
-        BufferedImage frame = player.getCurrentFrame();
-        if (frame != null) {
-            int drawW = 150;
-            int drawH = 150;
-            int drawX = previewRect.x + (previewRect.width - drawW) / 2;
-            int drawY = previewRect.y + 42;
-            g2.drawImage(frame, drawX, drawY, drawW, drawH, null);
+        int drawW = 150;
+        int drawH = 150;
+        int drawX = previewRect.x + (previewRect.width - drawW) / 2;
+        int drawY = previewRect.y + 42;
+
+        // 获取玩家当前帧索引
+        int playerFrameIndex = player.getCurrentFrameIndex();
+        String currentAction = player.getCurrentAction();
+
+        // 根据装备状态选择角色精灵图
+        java.awt.image.BufferedImage characterFrame = getCharacterFrame(playerFrameIndex);
+        if (characterFrame != null) {
+            if (!player.getIsLeft()) {
+                Graphics2D g2Flip = (Graphics2D) g2.create();
+                g2Flip.translate(drawX + drawW, drawY);
+                g2Flip.scale(-1, 1);
+                g2Flip.drawImage(characterFrame, 0, 0, drawW, drawH, null);
+                g2Flip.dispose();
+            } else {
+                g2.drawImage(characterFrame, drawX, drawY, drawW, drawH, null);
+            }
         } else {
             g2.setColor(new Color(255, 215, 120));
             g2.fillOval(previewRect.x + 48, previewRect.y + 48, 90, 110);
         }
 
+        // 叠加武器帧（仅在没有装备护甲时才叠加，因为armor_yellow已包含武器）
+        if (!player.hasArmorEquipped()) {
+            java.awt.image.BufferedImage weaponFrame = getWeaponFrame(playerFrameIndex, currentAction);
+            if (weaponFrame != null) {
+                if (!player.getIsLeft()) {
+                    Graphics2D g2Flip = (Graphics2D) g2.create();
+                    g2Flip.translate(drawX + drawW, drawY);
+                    g2Flip.scale(-1, 1);
+                    g2Flip.drawImage(weaponFrame, 0, 0, drawW, drawH, null);
+                    g2Flip.dispose();
+                } else {
+                    g2.drawImage(weaponFrame, drawX, drawY, drawW, drawH, null);
+                }
+            }
+        }
+
         g2.setColor(new Color(244, 225, 173));
         g2.setFont(new Font("SansSerif", Font.BOLD, 18));
         g2.drawString("Preview", previewRect.x + 50, previewRect.y + 26);
+    }
+
+    // 根据当前帧索引和装备状态获取角色帧
+    private java.awt.image.BufferedImage getCharacterFrame(int frameIndex) {
+        loadPreviewSprites();
+
+        java.awt.image.BufferedImage spriteSheet = player.hasArmorEquipped() ? armorSprite : wukongSprite;
+        if (spriteSheet == null) return null;
+
+        return extractFrame(spriteSheet, frameIndex);
+    }
+
+    // 根据当前帧索引和装备状态获取武器帧
+    private java.awt.image.BufferedImage getWeaponFrame(int frameIndex, String action) {
+        loadPreviewSprites();
+
+        boolean hasWeaponEquipped = inventory.getEquippedWeapon() != null;
+        java.awt.image.BufferedImage spriteSheet = hasWeaponEquipped ? staffSprite : weaponSprite;
+        if (spriteSheet == null) return null;
+
+        return extractFrame(spriteSheet, frameIndex);
+    }
+
+    private void loadPreviewSprites() {
+        if (spritesLoaded) return;
+        try {
+            wukongSprite = javax.imageio.ImageIO.read(new java.io.File("image/wukong/wukong0.png"));
+            armorSprite = javax.imageio.ImageIO.read(new java.io.File("image/wukong/armor_yellow.png"));
+            weaponSprite = javax.imageio.ImageIO.read(new java.io.File("image/weapon/weapon0.png"));
+            staffSprite = javax.imageio.ImageIO.read(new java.io.File("image/weapon/staff_red.png"));
+            spritesLoaded = true;
+        } catch (Exception e) {
+            // Ignore
+        }
+    }
+
+    private java.awt.image.BufferedImage extractFrame(java.awt.image.BufferedImage spriteSheet, int frameIndex) {
+        int firstX = 20, firstY = 30, frameSpacing = 200, frameWidth = 150, frameHeight = 150;
+        int maxCols = (spriteSheet.getWidth() - firstX) / frameSpacing;
+        int maxRows = (spriteSheet.getHeight() - firstY) / frameSpacing;
+
+        int row = frameIndex / maxCols;
+        int col = frameIndex % maxCols;
+        int x = firstX + col * frameSpacing;
+        int y = firstY + row * frameSpacing;
+
+        if (x + frameWidth <= spriteSheet.getWidth() && y + frameHeight <= spriteSheet.getHeight()) {
+            return spriteSheet.getSubimage(x, y, frameWidth, frameHeight);
+        }
+        return null;
     }
 
     private void drawEquipment(Graphics2D g2) {

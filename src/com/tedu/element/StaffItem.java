@@ -40,6 +40,7 @@ public class StaffItem extends Item implements EquipableItem {
     public void onEquip(WuKong player) {
         if (player != null) {
             player.addAttackPower(attackBonus);
+            setWeaponEquipped(true);
         }
     }
 
@@ -47,6 +48,22 @@ public class StaffItem extends Item implements EquipableItem {
     public void onUnequip(WuKong player) {
         if (player != null) {
             player.addAttackPower(-attackBonus);
+            setWeaponEquipped(false);
+        }
+    }
+
+    private void setWeaponEquipped(boolean equipped) {
+        try {
+            java.util.List<ElementObj> plays = com.tedu.manager.ElementManager.getManager()
+                .getElementsByKey(com.tedu.manager.GameElement.PLAY);
+            for (ElementObj obj : plays) {
+                if (obj instanceof com.tedu.element.Weapon) {
+                    ((com.tedu.element.Weapon) obj).setStaffEquipped(equipped);
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            // Weapon not found, ignore
         }
     }
 }

@@ -40,6 +40,7 @@ public class ArmorItem extends Item implements EquipableItem {
     public void onEquip(WuKong player) {
         if (player != null) {
             player.addMaxHp(hpBonus);
+            player.setArmorEquipped(true);
         }
     }
 
@@ -47,6 +48,7 @@ public class ArmorItem extends Item implements EquipableItem {
     public void onUnequip(WuKong player) {
         if (player != null) {
             player.addMaxHp(-hpBonus);
+            player.setArmorEquipped(false);
         }
     }
 }

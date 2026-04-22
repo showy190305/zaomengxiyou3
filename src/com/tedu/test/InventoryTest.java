@@ -13,12 +13,12 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import com.tedu.element.WuKong;
-import com.tedu.element.Inventory.BloodPotion;
-import com.tedu.element.Inventory.Inventory;
-import com.tedu.element.Inventory.InventoryItem;
-import com.tedu.element.Inventory.InventoryPanel;
-import com.tedu.element.Inventory.ManaPotion;
-import com.tedu.element.Inventory.PickupDetector;
+import com.tedu.element.BloodPotion;
+import com.tedu.element.Inventory;
+import com.tedu.element.InventoryItem;
+import com.tedu.element.InventoryPanel;
+import com.tedu.element.ManaPotion;
+import com.tedu.element.PickupDetector;
 import com.tedu.manager.ElementManager;
 import com.tedu.manager.GameElement;
 

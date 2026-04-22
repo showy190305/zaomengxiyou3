@@ -8,10 +8,10 @@ import javax.swing.ImageIcon;
 
 import com.tedu.element.ElementObj;
 import com.tedu.element.WuKong;
-import com.tedu.element.Inventory.BloodPotion;
-import com.tedu.element.Inventory.Inventory;
-import com.tedu.element.Inventory.Item;
-import com.tedu.element.Inventory.ManaPotion;
+import com.tedu.element.BloodPotion;
+import com.tedu.element.Inventory;
+import com.tedu.element.Item;
+import com.tedu.element.ManaPotion;
 import com.tedu.element.enemy.BaseEnemy;
 import com.tedu.manager.ElementManager;
 import com.tedu.manager.GameElement;
@@ -298,7 +298,7 @@ public class GameThread extends Thread {
         List<ElementObj> players = em.getElementsByKey(GameElement.PLAY);
         if (players == null || players.isEmpty()) return;
         
-        com.tedu.element.Inventory.PickupDetector detector = new com.tedu.element.Inventory.PickupDetector();
+        com.tedu.element.PickupDetector detector = new com.tedu.element.PickupDetector();
         com.tedu.element.ElementObj playerObj = players.get(0);
         if (playerObj instanceof com.tedu.element.WuKong) {
             detector.detectAndPickup((com.tedu.element.WuKong) playerObj);

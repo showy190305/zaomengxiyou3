@@ -141,8 +141,8 @@ public class GameLoad {
         em.addElement(wukong, GameElement.PLAY);
         Inventory inventory = Inventory.getInstance();
         if (inventory.getItems().isEmpty() && inventory.getEquippedWeapon() == null && inventory.getEquippedArmor() == null) {
-            inventory.addItem(new StaffItem("StarterStaff", 18, null));
-            inventory.addItem(new ArmorItem("StarterArmor", 40, null));
+            inventory.addItem(new StaffItem("StarterStaff", 18, new javax.swing.ImageIcon("image/icons/staff_icon.png")));
+            inventory.addItem(new ArmorItem("StarterArmor", 40, new javax.swing.ImageIcon("image/icons/armor_icon.png")));
             inventory.addItem(new BloodPotion());
             inventory.addItem(new BloodPotion());
             inventory.addItem(new ManaPotion());

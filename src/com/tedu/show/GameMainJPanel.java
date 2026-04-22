@@ -14,9 +14,9 @@ import javax.swing.JPanel;
 
 import com.tedu.element.ElementObj;
 import com.tedu.element.WuKong;
-import com.tedu.element.Inventory.Inventory;
-import com.tedu.element.Inventory.InventoryPanel;
-import com.tedu.element.Inventory.PickupDetector;
+import com.tedu.element.Inventory;
+import com.tedu.element.InventoryPanel;
+import com.tedu.element.PickupDetector;
 import com.tedu.manager.ElementManager;
 import com.tedu.manager.GameElement;
 
