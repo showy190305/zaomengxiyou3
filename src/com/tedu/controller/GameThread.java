@@ -6,13 +6,13 @@ import java.util.Random;
 
 import javax.swing.ImageIcon;
 
-import com.tedu.element.BaseEnemy;
-import com.tedu.element.BloodPotion;
 import com.tedu.element.ElementObj;
-import com.tedu.element.Inventory;
-import com.tedu.element.Item;
-import com.tedu.element.ManaPotion;
 import com.tedu.element.WuKong;
+import com.tedu.element.Inventory.BloodPotion;
+import com.tedu.element.Inventory.Inventory;
+import com.tedu.element.Inventory.Item;
+import com.tedu.element.Inventory.ManaPotion;
+import com.tedu.element.enemy.BaseEnemy;
 import com.tedu.manager.ElementManager;
 import com.tedu.manager.GameElement;
 import com.tedu.manager.GameLoad;
@@ -27,8 +27,15 @@ public class GameThread extends Thread {
     public static boolean isGameRunning = true;
     private boolean isPortalSpawned = false;
 
+    private int levelIndex = 1; // 默认关卡为1
+    
     public GameThread() {
         em = ElementManager.getManager();
+    }
+    
+    public GameThread(int levelIndex) {
+        this();
+        this.levelIndex = levelIndex;
     }
 
     /**
@@ -63,7 +70,8 @@ public class GameThread extends Thread {
 
     private void gameLoad() {
         GameLoad.loadImg();  
-        GameLoad.loadMap();  // 如果有 loadMap 可以放开
+        // 根据关卡参数加载不同的地图
+        GameLoad.loadMap(levelIndex);  // 使用关卡参数加载对应地图
         GameLoad.loadPlay(); 
         System.out.println("✅ 资源加载完毕");
     }
@@ -72,8 +80,8 @@ public class GameThread extends Thread {
         if (plays == null) return;
         for (int i = plays.size() - 1; i >= 0; i--) {
             ElementObj obj = plays.get(i);
-            if (obj instanceof com.tedu.element.Fireball) {
-                if (!((com.tedu.element.Fireball) obj).isActive) plays.remove(i); 
+            if (obj instanceof com.tedu.element.skill.Fireball) {
+                if (!((com.tedu.element.skill.Fireball) obj).isActive) plays.remove(i); 
             }
             else if (obj instanceof com.tedu.element.DamageText) {
                 if (((com.tedu.element.DamageText) obj).isDead()) plays.remove(i);
@@ -151,8 +159,8 @@ public class GameThread extends Thread {
         if (enemys != null && !enemys.isEmpty()) {
             for (int i = 0; i < enemys.size(); i++) {
                 ElementObj obj = enemys.get(i);
-                if (obj instanceof com.tedu.element.enemy2) {
-                    com.tedu.element.enemy2 enemy = (com.tedu.element.enemy2) obj;
+                if (obj instanceof com.tedu.element.enemy.BaseEnemy) {
+                    com.tedu.element.enemy.BaseEnemy enemy = (com.tedu.element.enemy.BaseEnemy) obj;
                     
                     if (enemy.hp <= 0) {
                         handleEnemyDrop(enemy);
@@ -179,8 +187,8 @@ public class GameThread extends Thread {
                     // 火球判定
                     for (int j = 0; j < plays.size(); j++) {
                         ElementObj playObj = plays.get(j);
-                        if (playObj instanceof com.tedu.element.Fireball) {
-                            com.tedu.element.Fireball fireball = (com.tedu.element.Fireball) playObj;
+                        if (playObj instanceof com.tedu.element.skill.Fireball) {
+                            com.tedu.element.skill.Fireball fireball = (com.tedu.element.skill.Fireball) playObj;
                             if (fireball.isActive && fireball.getHitBox().intersects(enemyBox)) {
                                 enemy.takeDamage(fireball.damage);
                                 fireball.isActive = false; 
@@ -290,7 +298,7 @@ public class GameThread extends Thread {
         List<ElementObj> players = em.getElementsByKey(GameElement.PLAY);
         if (players == null || players.isEmpty()) return;
         
-        com.tedu.element.PickupDetector detector = new com.tedu.element.PickupDetector();
+        com.tedu.element.Inventory.PickupDetector detector = new com.tedu.element.Inventory.PickupDetector();
         com.tedu.element.ElementObj playerObj = players.get(0);
         if (playerObj instanceof com.tedu.element.WuKong) {
             detector.detectAndPickup((com.tedu.element.WuKong) playerObj);

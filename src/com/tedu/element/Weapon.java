@@ -12,6 +12,8 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
+import com.tedu.element.map.MapBase;
+
 public class Weapon extends ElementObj {
     // 武器角色的圖像幀列表
     private List<BufferedImage> frames;
@@ -157,7 +159,7 @@ public class Weapon extends ElementObj {
         // E. 最終渲染 (帶攝影機偏移和鏡像翻轉)
         if (frames != null && !frames.isEmpty() && currentFrame < frames.size()) {
             BufferedImage currentImage = frames.get(currentFrame);
-            int screenX = this.getX() + MapObj.bgOffsetX;
+            int screenX = this.getX() + MapBase.getBgOffsetX();
             
             if (!isLeft) {  // 面向右側 (水平翻轉)
                 Graphics2D g2d = (Graphics2D) g.create();  

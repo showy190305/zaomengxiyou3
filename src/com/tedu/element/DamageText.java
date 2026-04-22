@@ -34,7 +34,7 @@ public class DamageText extends ElementObj {
         if (alpha < 0) alpha = 0;
 
         // 3. 渲染逻辑（跟着屏幕摄像机一起移动）
-        int screenX = this.getX() + com.tedu.element.MapObj.bgOffsetX;
+        int screenX = this.getX() + com.tedu.element.map.MapBase.getBgOffsetX();
         g.setFont(new Font("微软雅黑", Font.BOLD, 26)); // 字体加大一点，更有打击感
         
         // 画个黑色文字阴影，防止背景太亮看不清

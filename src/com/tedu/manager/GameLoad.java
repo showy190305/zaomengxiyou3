@@ -31,14 +31,30 @@ public class GameLoad {
 
     // ================== 你的新地图逻辑 ==================
     /**
-     * 加载全景卷轴地图 (替代原来的文本网格地图)
+     * 根据地图ID加载对应地图
+     * @param mapId 地图编号 (1-3)
      */
-    public static void loadMap() {
-        // 实例化你写好的滚动背景类
-        ElementObj map = new com.tedu.element.MapObj();
+    public static void loadMap(int mapId) {
+        ElementObj map;
+        switch(mapId) {
+            case 1:
+                map = new com.tedu.element.map.MapObj1();
+                break;
+            case 2:
+                map = new com.tedu.element.map.MapObj2();
+                break;
+            case 3:
+                map = new com.tedu.element.map.MapObj3();
+                break;
+            default:
+                // 默认加载地图3
+                map = new com.tedu.element.map.MapObj3();
+                System.out.println("无效地图ID，加载默认地图");
+                break;
+        }
         // 放进 MAPS 集合中
         em.addElement(map, GameElement.MAPS);
-        System.out.println("横轴全景地图加载完毕！");
+        System.out.println("地图" + mapId + "加载完毕！");
     }
     // ====================================================
 
@@ -97,19 +113,25 @@ public class GameLoad {
      * 加载玩家、武器与怪物
      */
     public static void loadPlay() {
+        loadPlay(1);  // 默认加载第1关
+    }
+    
+    public static void loadPlay(int levelIndex) {
         // 先加载对象映射，防止反射失败
         loadObj();
 
+        // 根据关卡确定角色初始位置
+        String initialPos = getInitialPositionForLevel(levelIndex);
+        
         // 1. 加载大圣
         ElementObj wukong = new com.tedu.element.WuKong();
-        wukong.createElement("100,400,150,150"); 
+        wukong.createElement(initialPos); 
         
         // 【防报错临时注释】：等待组员完成 PlayerSave 类后解开
         
         if (currentSave != null) {
             ((com.tedu.element.WuKong) wukong).loadFromSave(currentSave);
         }
-        
         
         em.addElement(wukong, GameElement.PLAY);
 
@@ -125,27 +147,21 @@ public class GameLoad {
 
         // 2. 加载武器
         ElementObj weapon = new com.tedu.element.Weapon();
-        weapon.createElement("100,400,150,150");
+        weapon.createElement(initialPos);
         em.addElement(weapon, GameElement.PLAY);
 
         // ==========================================================
         // 3. 【优化】：关卡怪物配置表 (X坐标, 怪物数量)
-        // 你可以在这里自由设计关卡节奏！
+        // 为不同关卡配置不同的怪物分布
         // ==========================================================
-        int[][] spawnConfig = {
-            {800,  2},  // 第一波：X=800处，2只怪（新手热身）
-            {2000, 3},  // 第二波：X=2000处，3只怪
-            {3800, 2},  // 第三波：X=3800处，2只怪
-            {5500, 4},  // 第四波：X=5500处，4只怪（小高潮）
-            {7500, 5}   // 第五波：X=7500处，5只怪（关底大决战）
-        };
+        int[][] spawnConfig = getMonsterSpawnConfigForLevel(levelIndex);
 
         for (int i = 0; i < spawnConfig.length; i++) {
             int spawnX = spawnConfig[i][0];
             int count = spawnConfig[i][1];
             
             for (int j = 0; j < count; j++) {
-                ElementObj enemy = new com.tedu.element.enemy2();
+                ElementObj enemy = new com.tedu.element.enemy.enemy2();
                 // 给同批次的怪物加上偏移量 (j * 80)，防止它们完美重叠在一起
                 int finalX = spawnX + (j * 80);
                 enemy.createElement(finalX + ",400,150,150");
@@ -153,7 +169,63 @@ public class GameLoad {
             }
         }
         
-        System.out.println("关卡怪物已按配置表部署完毕！");
+        System.out.println("关卡" + levelIndex + "怪物已按配置表部署完毕！");
+    }
+    
+    // 根据关卡获取角色初始位置
+    private static String getInitialPositionForLevel(int levelIndex) {
+        switch(levelIndex) {
+            case 1:
+                return "100,400,150,150";  // 龙宫地图初始位置
+            case 2:
+                return "100,400,150,150";  // 天宫岛初始位置
+            case 3:
+                return "100,400,150,150";  // 南天门初始位置
+            default:
+                return "100,400,150,150";  // 默认位置
+        }
+    }
+    
+    // 根据关卡获取怪物生成配置
+    private static int[][] getMonsterSpawnConfigForLevel(int levelIndex) {
+        switch(levelIndex) {
+            case 1:
+                // 龙宫地图怪物配置
+                return new int[][] {
+                    {800,  2},  // 第一波：X=800处，2只怪（新手热身）
+                    {2000, 3},  // 第二波：X=2000处，3只怪
+                    {3800, 2},  // 第三波：X=3800处，2只怪
+                    {5500, 4},  // 第四波：X=5500处，4只怪（小高潮）
+                    {7500, 5}   // 第五波：X=7500处，5只怪（关底大决战）
+                };
+            case 2:
+                // 天宫岛怪物配置
+                return new int[][] {
+                    {800,  3},  // 第一波：X=800处，3只怪
+                    {2200, 2},  // 第二波：X=2200处，2只怪
+                    {3500, 4},  // 第三波：X=3500处，4只怪
+                    {5000, 3},  // 第四波：X=5000处，3只怪
+                    {6800, 5}   // 第五波：X=6800处，5只怪
+                };
+            case 3:
+                // 南天门怪物配置
+                return new int[][] {
+                    {600,  2},  // 第一波：X=600处，2只怪
+                    {1800, 3},  // 第二波：X=1800处，3只怪
+                    {3200, 2},  // 第三波：X=3200处，2只怪
+                    {4800, 4},  // 第四波：X=4800处，4只怪
+                    {6500, 6}   // 第五波：X=6500处，6只怪
+                };
+            default:
+                // 默认怪物配置
+                return new int[][] {
+                    {800,  2},  // 第一波：X=800处，2只怪（新手热身）
+                    {2000, 3},  // 第二波：X=2000处，3只怪
+                    {3800, 2},  // 第三波：X=3800处，2只怪
+                    {5500, 4},  // 第四波：X=5500处，4只怪（小高潮）
+                    {7500, 5}   // 第五波：X=7500处，5只怪（关底大决战）
+                };
+        }
     }
     
     public static ElementObj getObj(String str) {

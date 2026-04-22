@@ -14,6 +14,8 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
+import com.tedu.element.Inventory.Inventory;
+
 public class WuKong extends ElementObj {
 // ===================================
     // 【新增】：当前攻击的唯一ID (保留 jwj)
@@ -355,7 +357,7 @@ public class WuKong extends ElementObj {
                     // 动态伤害公式
                     int skillDamage = (int)(this.attackPower * 1.5) + (this.level * 5);
                     
-                    com.tedu.element.Fireball fb = new com.tedu.element.Fireball(fireballX, fireballY, this.isLeft, skillDamage);
+                    com.tedu.element.skill.Fireball fb = new com.tedu.element.skill.Fireball(fireballX, fireballY, this.isLeft, skillDamage);
                     com.tedu.manager.ElementManager.getManager().addElement(fb, com.tedu.manager.GameElement.PLAY);
                     
                     System.out.println("🔥 释放火球！动态伤害已计算为: " + skillDamage);
@@ -378,7 +380,7 @@ public class WuKong extends ElementObj {
                 int spX = (this.getX() + this.getW() / 2) - (spW / 2);
                 int spY = (this.getY() + this.getH()) - spH;
                 
-                com.tedu.element.SpecialSpin sp = new com.tedu.element.SpecialSpin(spX, spY, spW, spH, attackPower);
+                com.tedu.element.skill.SpecialSpin sp = new com.tedu.element.skill.SpecialSpin(spX, spY, spW, spH, attackPower);
                 com.tedu.manager.ElementManager.getManager().addElement(sp, com.tedu.manager.GameElement.PLAY);
                 
                 System.out.println("🌪️ 大圣化形！大招启动！消耗MP：" + mpCost + "，进入冷却...");
@@ -402,7 +404,7 @@ public class WuKong extends ElementObj {
                 int skillDamage = (int)(this.attackPower * 1.2); 
                 if (skillDamage < 1) skillDamage = 1;
                 
-                com.tedu.element.TornadoDash dash = new com.tedu.element.TornadoDash(dashX, dashY, dashW, dashH, this.isLeft, skillDamage);
+                com.tedu.element.skill.TornadoDash dash = new com.tedu.element.skill.TornadoDash(dashX, dashY, dashW, dashH, this.isLeft, skillDamage);
                 com.tedu.manager.ElementManager.getManager().addElement(dash, com.tedu.manager.GameElement.PLAY);
                 
                 System.out.println("💨 龙卷风突进！伤害判定为：" + skillDamage);
@@ -578,7 +580,7 @@ public class WuKong extends ElementObj {
         }
 
         java.awt.Graphics2D g2d = (java.awt.Graphics2D) g;
-        int screenX = this.getX() + com.tedu.element.MapObj.bgOffsetX;
+        int screenX = this.getX() + com.tedu.element.map.MapBase.getBgOffsetX();
 
         // =======================================================
         // 第一层：【无敌帧闪烁拦截】 (保持在最底层)
