@@ -15,9 +15,6 @@ public class MapObj1 extends MapBase {
     private int bgWidth = 0; 
     private int bgHeight = 600; 
     
-    // 【核心引擎变量】：全局摄像机偏移量
-    public static int bgOffsetX = 0; 
-
     public MapObj1() {
         for (int i = 0; i < 6; i++) {
             bgs[i] = new ImageIcon("image/bg/longgong/bg" + (i + 1) + ".jpg");
@@ -40,17 +37,16 @@ public class MapObj1 extends MapBase {
             }
         } catch (Exception e) {}
 
-        // 当猴子走到屏幕中点(400)后，计算背景需要往左拉多少
         if (cameraX > 400) {
-            bgOffsetX = -(cameraX - 400); 
+            MapBase.bgOffsetX = -(cameraX - 400); 
         } else {
-            bgOffsetX = 0;
+            MapBase.bgOffsetX = 0;
         }
 
 
         // 绘制无缝背景
         for (int i = 0; i < 6; i++) {
-            int drawX = bgOffsetX + (i * bgWidth);
+            int drawX = MapBase.bgOffsetX + (i * bgWidth);
             g.drawImage(bgs[i].getImage(), drawX, 0, bgWidth, bgHeight, null);
         }
     }

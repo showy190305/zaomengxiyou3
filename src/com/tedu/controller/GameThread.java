@@ -72,7 +72,7 @@ public class GameThread extends Thread {
         GameLoad.loadImg();  
         // 根据关卡参数加载不同的地图
         GameLoad.loadMap(levelIndex);  // 使用关卡参数加载对应地图
-        GameLoad.loadPlay(); 
+        GameLoad.loadPlay(levelIndex); 
         System.out.println("✅ 资源加载完毕");
     }
 
@@ -207,7 +207,7 @@ public class GameThread extends Thread {
             System.out.println("✨ 怪物已全军覆没！传送门开启！");
             ElementObj portal = new com.tedu.element.Portal();
             int portalX = wukong.getX() + 300;
-            if (portalX > 8800) portalX = 8800; 
+            if (portalX > 4600) portalX = 4600; 
             
             portal.createElement(portalX + ",350,100,150");
             com.tedu.manager.ElementManager.getManager().addElement(portal, com.tedu.manager.GameElement.PLAY);

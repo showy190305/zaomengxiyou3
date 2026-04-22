@@ -1,5 +1,8 @@
 package com.tedu.element.Inventory;
 
+import com.tedu.element.Inventory.BloodPotion;
+import com.tedu.element.Inventory.ManaPotion;
+
 /**
  * 背包中的物品包装类
  * 持有 Item 引用 + 数量，支持堆叠（最多99个）

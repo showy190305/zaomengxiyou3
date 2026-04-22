@@ -43,7 +43,7 @@ public class Fireball extends ElementObj {
         }
 
         // 2. 销毁逻辑：如果飞出地图边界，自动标记为死亡，防止内存泄漏
-        if (this.getX() < 0 || this.getX() > 9000) {
+        if (this.getX() < 0 || this.getX() > 4700) {
             this.isActive = false;
         }
 

@@ -768,7 +768,7 @@ public class WuKong extends ElementObj {
                 
                 // 世界边界空气墙
                 if (this.getX() < 0) this.setX(0);
-                if (this.getX() > 9000 - this.getW()) this.setX(9000 - this.getW());
+                if (this.getX() > 4700 - this.getW()) this.setX(4700 - this.getW());
             }
 
             // Y轴物理引擎

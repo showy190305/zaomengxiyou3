@@ -138,7 +138,7 @@ public abstract class BaseEnemy extends ElementObj {
         }
     }
     
-    private void updateAnimation() {
+    protected void updateAnimation() {
         long currentTime = System.currentTimeMillis();
 
         if (invincibleTimer > 0) invincibleTimer--;
@@ -222,7 +222,7 @@ public abstract class BaseEnemy extends ElementObj {
                 }
 
                 if (this.getX() < 0) this.setX(0);
-                if (this.getX() > 9000 - this.getW()) this.setX(9000 - this.getW());
+                if (this.getX() > 4700 - this.getW()) this.setX(4700 - this.getW());
             }
         }
 
@@ -271,5 +271,13 @@ public abstract class BaseEnemy extends ElementObj {
 
     public void markDropGenerated() {
         this.dropGenerated = true;
+    }
+
+    public java.util.List<java.awt.image.BufferedImage> getFrames() {
+        return this.frames;
+    }
+
+    public java.util.Map<String, java.util.List<Integer>> getActionGroups() {
+        return this.actionGroups;
     }
 }

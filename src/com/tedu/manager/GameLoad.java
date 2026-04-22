@@ -154,14 +154,15 @@ public class GameLoad {
         // 3. 【优化】：关卡怪物配置表 (X坐标, 怪物数量)
         // 为不同关卡配置不同的怪物分布
         // ==========================================================
-        int[][] spawnConfig = getMonsterSpawnConfigForLevel(levelIndex);
+        EnemySpawnConfig[] spawnConfig = getMonsterSpawnConfigForLevel(levelIndex);
 
         for (int i = 0; i < spawnConfig.length; i++) {
-            int spawnX = spawnConfig[i][0];
-            int count = spawnConfig[i][1];
+            int spawnX = spawnConfig[i].x;
+            int count = spawnConfig[i].count;
+            String enemyType = spawnConfig[i].type;
             
             for (int j = 0; j < count; j++) {
-                ElementObj enemy = new com.tedu.element.enemy.enemy2();
+                ElementObj enemy = createEnemyByType(enemyType);
                 // 给同批次的怪物加上偏移量 (j * 80)，防止它们完美重叠在一起
                 int finalX = spawnX + (j * 80);
                 enemy.createElement(finalX + ",400,150,150");
@@ -186,45 +187,94 @@ public class GameLoad {
         }
     }
     
+    // 定义敌人生成配置类
+    private static class EnemySpawnConfig {
+        int x;          // 生成X坐标
+        int count;      // 生成数量
+        String type;    // 敌人类型
+        
+        public EnemySpawnConfig(int x, int count, String type) {
+            this.x = x;
+            this.count = count;
+            this.type = type;
+        }
+    }
+    
     // 根据关卡获取怪物生成配置
-    private static int[][] getMonsterSpawnConfigForLevel(int levelIndex) {
+    private static EnemySpawnConfig[] getMonsterSpawnConfigForLevel(int levelIndex) {
         switch(levelIndex) {
             case 1:
-                // 龙宫地图怪物配置
-                return new int[][] {
-                    {800,  2},  // 第一波：X=800处，2只怪（新手热身）
-                    {2000, 3},  // 第二波：X=2000处，3只怪
-                    {3800, 2},  // 第三波：X=3800处，2只怪
-                    {5500, 4},  // 第四波：X=5500处，4只怪（小高潮）
-                    {7500, 5}   // 第五波：X=7500处，5只怪（关底大决战）
+                // 龙宫地图怪物配置，使用enemy3
+                return new EnemySpawnConfig[] {
+                    new EnemySpawnConfig(500,  2, "boss1"),  // 第一波：X=800处，2只enemy3（新手热身）
+                    new EnemySpawnConfig(1000, 3, "boss2"),  // 第二波：X=2000处，3只enemy3
+                    new EnemySpawnConfig(2000, 2, "enemy2"),  // 第三波：X=3800处，2只enemy3
+                    new EnemySpawnConfig(3000, 4, "enemy2"),  // 第四波：X=5500处，4只enemy3（小高潮）
+                    new EnemySpawnConfig(4000, 5, "enemy2")   // 第五波：X=7500处，5只enemy3（关底大决战）
                 };
             case 2:
-                // 天宫岛怪物配置
-                return new int[][] {
-                    {800,  3},  // 第一波：X=800处，3只怪
-                    {2200, 2},  // 第二波：X=2200处，2只怪
-                    {3500, 4},  // 第三波：X=3500处，4只怪
-                    {5000, 3},  // 第四波：X=5000处，3只怪
-                    {6800, 5}   // 第五波：X=6800处，5只怪
+                // 天宫岛怪物配置，使用enemy4
+                return new EnemySpawnConfig[] {
+                    new EnemySpawnConfig(500,  2, "enemy3"),  // 第一波：X=800处，2只enemy3（新手热身）
+                    new EnemySpawnConfig(1000, 3, "enemy3"),  // 第二波：X=2000处，3只enemy3
+                    new EnemySpawnConfig(2000, 2, "enemy3"),  // 第三波：X=3800处，2只enemy3
+                    new EnemySpawnConfig(3000, 3, "enemy3"),  // 第四波：X=5500处，4只enemy3（小高潮）
+                    new EnemySpawnConfig(4000, 4, "enemy3"),   // 第五波：X=7500处，5只enemy3（关底大决战）
+                    new EnemySpawnConfig(700,  2, "enemy4"),  // 第一波：X=800处，3只enemy4
+                    new EnemySpawnConfig(1200, 2, "enemy4"),  // 第二波：X=2200处，2只enemy4
+                    new EnemySpawnConfig(2200, 3, "enemy4"),  // 第三波：X=3500处，4只enemy4
+                    new EnemySpawnConfig(3200, 2, "enemy4"),  // 第四波：X=5000处，3只enemy4
+                    new EnemySpawnConfig(3800, 4, "enemy4"),   // 第五波：X=6800处，5只enemy4
+                    new EnemySpawnConfig(4400, 1, "boss1")
                 };
             case 3:
-                // 南天门怪物配置
-                return new int[][] {
-                    {600,  2},  // 第一波：X=600处，2只怪
-                    {1800, 3},  // 第二波：X=1800处，3只怪
-                    {3200, 2},  // 第三波：X=3200处，2只怪
-                    {4800, 4},  // 第四波：X=4800处，4只怪
-                    {6500, 6}   // 第五波：X=6500处，6只怪
+                // 南天门怪物配置，使用enemy5
+                return new EnemySpawnConfig[] {
+                    new EnemySpawnConfig(500,  2, "enemy3"),  // 第一波：X=800处，2只enemy3（新手热身）
+                    new EnemySpawnConfig(1000, 3, "enemy3"),  // 第二波：X=2000处，3只enemy3
+                    new EnemySpawnConfig(2000, 2, "enemy3"),  // 第三波：X=3800处，2只enemy3
+                    new EnemySpawnConfig(3000, 2, "enemy3"),  // 第四波：X=5500处，4只enemy3（小高潮）
+                    new EnemySpawnConfig(4000, 3, "enemy3"),   // 第五波：X=7500处，5只enemy3（关底大决战）
+                    new EnemySpawnConfig(700,  2, "enemy4"),  // 第一波：X=800处，3只enemy4
+                    new EnemySpawnConfig(1200, 2, "enemy4"),  // 第二波：X=2200处，2只enemy4
+                    new EnemySpawnConfig(2200, 2, "enemy4"),  // 第三波：X=3500处，4只enemy4
+                    new EnemySpawnConfig(3200, 2, "enemy4"),  // 第四波：X=5000处，3只enemy4
+                    new EnemySpawnConfig(3800, 3, "enemy4"),   // 第五波：X=6800处，5只enemy4
+                    new EnemySpawnConfig(600,  2, "enemy5"),  // 第一波：X=600处，2只enemy5
+                    new EnemySpawnConfig(1500, 3, "enemy5"),  // 第二波：X=1800处，3只enemy5
+                    new EnemySpawnConfig(2500, 2, "enemy5"),  // 第三波：X=3200处，2只enemy5
+                    new EnemySpawnConfig(3500, 4, "enemy5"),  // 第四波：X=4800处，4只enemy5
+                    new EnemySpawnConfig(4400, 1, "boss2")
                 };
             default:
-                // 默认怪物配置
-                return new int[][] {
-                    {800,  2},  // 第一波：X=800处，2只怪（新手热身）
-                    {2000, 3},  // 第二波：X=2000处，3只怪
-                    {3800, 2},  // 第三波：X=3800处，2只怪
-                    {5500, 4},  // 第四波：X=5500处，4只怪（小高潮）
-                    {7500, 5}   // 第五波：X=7500处，5只怪（关底大决战）
+                // 默认怪物配置，使用enemy2
+                return new EnemySpawnConfig[] {
+                    new EnemySpawnConfig(800,  2, "enemy2"),  // 第一波：X=800处，2只enemy2（新手热身）
+                    new EnemySpawnConfig(2000, 3, "enemy2"),  // 第二波：X=2000处，3只enemy2
+                    new EnemySpawnConfig(3800, 2, "enemy2"),  // 第三波：X=3800处，2只enemy2
+                    new EnemySpawnConfig(5500, 4, "enemy2"),  // 第四波：X=5500处，4只enemy2（小高潮）
+                    new EnemySpawnConfig(7500, 5, "enemy2")   // 第五波：X=7500处，5只enemy2（关底大决战）
                 };
+        }
+    }
+    
+    // 根据类型创建敌人实例
+    private static ElementObj createEnemyByType(String enemyType) {
+        switch(enemyType) {
+            case "boss1":
+                return new com.tedu.element.enemy.boss1();
+            case "boss2":
+                return new com.tedu.element.enemy.boss2(); 
+            case "enemy2":
+                return new com.tedu.element.enemy.enemy2();
+            case "enemy3":
+                return new com.tedu.element.enemy.enemy3();
+            case "enemy4":
+                return new com.tedu.element.enemy.enemy4();
+            case "enemy5":
+                return new com.tedu.element.enemy.enemy5();
+            default:
+                return new com.tedu.element.enemy.enemy2(); // 默认返回enemy2
         }
     }
     
