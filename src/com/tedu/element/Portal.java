@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
+import com.tedu.element.map.MapBase;
+
 public class Portal extends ElementObj {
 
     @Override
@@ -19,7 +21,7 @@ public class Portal extends ElementObj {
     @Override
     public void showElement(Graphics g) {
         // 摄像机偏移，让传送门老老实实呆在地图尽头
-        int screenX = this.getX() + MapObj.bgOffsetX;
+        int screenX = this.getX() + MapBase.getBgOffsetX();
         
         // 当传送门进入屏幕视野时才绘制
         if (screenX > -200 && screenX < 1000) {

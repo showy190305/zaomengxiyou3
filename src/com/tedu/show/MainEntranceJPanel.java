@@ -142,7 +142,7 @@ public class MainEntranceJPanel extends JPanel {
         // 绑定背包面板到监听器
         listener.setInventoryPanel(newGamePanel.getInventoryPanel());
         
-        com.tedu.controller.GameThread thread = new com.tedu.controller.GameThread();
+        com.tedu.controller.GameThread thread = new com.tedu.controller.GameThread(levelIndex);
         
         frame.setThead(thread);
         frame.setjPanel(newGamePanel);

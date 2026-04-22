@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.tedu.element.ElementObj;
-import com.tedu.element.InventoryPanel;
+import com.tedu.element.Inventory.InventoryPanel;
 import com.tedu.manager.ElementManager;
 import com.tedu.manager.GameElement;
 import com.tedu.show.GameMainJPanel;
