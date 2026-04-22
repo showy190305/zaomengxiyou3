@@ -19,6 +19,11 @@ public class Weapon extends ElementObj {
     private List<BufferedImage> frames;
     private BufferedImage spriteSheet; // 整張精靈圖
     
+    // 法杖狀態的圖像幀列表
+    private List<BufferedImage> staffFrames;
+    private BufferedImage staffSpriteSheet; // 法杖精靈圖
+    private boolean hasStaffEquipped = false; // 是否裝備了法杖（武器贴图已包含在角色精灵图中）
+    
     // 動作分組
     private Map<String, List<Integer>> actionGroups;
     
@@ -41,6 +46,10 @@ public class Weapon extends ElementObj {
         try {
             spriteSheet = ImageIO.read(new File("image/weapon/weapon0.png"));
             frames = new ArrayList<>();
+            
+            // 加载法杖精灵图
+            staffSpriteSheet = ImageIO.read(new File("image/weapon/staff_red.png"));
+            staffFrames = new ArrayList<>();
             
             int firstX = 20;  
             int firstY = 30;  
@@ -65,6 +74,25 @@ public class Weapon extends ElementObj {
                 }
             }
             System.out.println("武器精靈圖加載完成，共加載 " + frames.size() + " 幀");
+            
+            // === 裁剪法杖状态的帧（使用相同参数） ===
+            int staffMaxCols = (staffSpriteSheet.getWidth() - firstX) / frameSpacing;
+            int staffMaxRows = (staffSpriteSheet.getHeight() - firstY) / frameSpacing;
+            
+            for (int row = 0; row < staffMaxRows; row++) {
+                for (int col = 0; col < staffMaxCols; col++) {
+                    int x = firstX + col * frameSpacing;
+                    int y = firstY + row * frameSpacing;
+                    
+                    if (x + frameWidth <= staffSpriteSheet.getWidth() && 
+                        y + frameHeight <= staffSpriteSheet.getHeight()) {
+                        
+                        BufferedImage frame = staffSpriteSheet.getSubimage(x, y, frameWidth, frameHeight);
+                        staffFrames.add(frame);
+                    }
+                }
+            }
+            System.out.println("法杖精靈圖加載完成，共加載 " + staffFrames.size() + " 幀");
         } catch (IOException e) {
             System.out.println("加載武器精靈圖失敗: " + e.getMessage());
             frames = new ArrayList<>();
@@ -157,8 +185,9 @@ public class Weapon extends ElementObj {
         } catch (Exception e) {}
 
         // E. 最終渲染 (帶攝影機偏移和鏡像翻轉)
-        if (frames != null && !frames.isEmpty() && currentFrame < frames.size()) {
-            BufferedImage currentImage = frames.get(currentFrame);
+        List<BufferedImage> activeFrames = hasStaffEquipped ? staffFrames : frames;
+        if (activeFrames != null && !activeFrames.isEmpty() && currentFrame < activeFrames.size()) {
+            BufferedImage currentImage = activeFrames.get(currentFrame);
             int screenX = this.getX() + MapBase.getBgOffsetX();
             
             if (!isLeft) {  // 面向右側 (水平翻轉)
@@ -201,5 +230,13 @@ public class Weapon extends ElementObj {
     // 告訴外界（裁判 GameThread），武器現在是不是正在砍人
     public boolean isAttacking() {
         return this.currentAction != null && this.currentAction.startsWith("attack");
+    }
+    
+    public void setStaffEquipped(boolean equipped) {
+        this.hasStaffEquipped = equipped;
+    }
+    
+    public boolean hasStaffEquipped() {
+        return hasStaffEquipped;
     }
 }

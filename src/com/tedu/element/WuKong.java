@@ -14,7 +14,7 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
-import com.tedu.element.Inventory.Inventory;
+import com.tedu.element.Inventory;
 
 public class WuKong extends ElementObj {
 // ===================================
@@ -28,6 +28,11 @@ public class WuKong extends ElementObj {
     // 悟空角色的图像帧列表
     private List<BufferedImage> frames;
     private BufferedImage spriteSheet; // 整张精灵图
+    
+    // 装备状态的图像帧列表
+    private List<BufferedImage> armorFrames;
+    private BufferedImage armorSpriteSheet; // 装备状态的精灵图
+    private boolean hasArmorEquipped = false; // 是否装备了护甲
     
     // 动作分组
     private Map<String, List<Integer>> actionGroups;
@@ -155,6 +160,10 @@ public class WuKong extends ElementObj {
             spriteSheet = ImageIO.read(new File("image/wukong/wukong0.png"));
             skillIcon = ImageIO.read(new File("image/skill/fireball.png"));
             
+            // 加载装备状态的精灵图
+            armorSpriteSheet = ImageIO.read(new File("image/wukong/armor_yellow.png"));
+            armorFrames = new ArrayList<>();
+            
             // 初始化帧列表
             frames = new ArrayList<>();
             skill2Frames = new ArrayList<>(); // 必须加上！
@@ -214,6 +223,25 @@ public class WuKong extends ElementObj {
             System.out.println("使用坐标: 第一帧(" + firstX + "," + firstY + ")，间距:" + frameSpacing + 
                              "，帧尺寸:" + frameWidth + "x" + frameHeight);
             System.out.println("成功加载受击动作，包含 " + hitFrames.size() + " 帧！");
+            
+            // === 裁剪装备状态的帧（使用相同参数） ===
+            int armorMaxCols = (armorSpriteSheet.getWidth() - firstX) / frameSpacing;
+            int armorMaxRows = (armorSpriteSheet.getHeight() - firstY) / frameSpacing;
+            
+            for (int row = 0; row < armorMaxRows; row++) {
+                for (int col = 0; col < armorMaxCols; col++) {
+                    int x = firstX + col * frameSpacing;
+                    int y = firstY + row * frameSpacing;
+                    
+                    if (x + frameWidth <= armorSpriteSheet.getWidth() && 
+                        y + frameHeight <= armorSpriteSheet.getHeight()) {
+                        
+                        BufferedImage frame = armorSpriteSheet.getSubimage(x, y, frameWidth, frameHeight);
+                        armorFrames.add(frame);
+                    }
+                }
+            }
+            System.out.println("装备精灵图加载完成，共加载 " + armorFrames.size() + " 帧");
             
             // ==========================================================
             // 加载技能 2 和技能 3 的序列帧素材
@@ -300,7 +328,9 @@ public class WuKong extends ElementObj {
         else if (key == java.awt.event.KeyEvent.VK_A) {
             if (bl) {
                 aPressed = true;
-                isLeft = true;
+                if (!attackLock) {
+                    isLeft = true;
+                }
                 // 只有没挥棒、没跳跃时，按A键才会触发走路/奔跑！
                 if (!attackLock && !isJumping) {
                     setAction(aClickCount == 1 ? "run" : "walk");
@@ -317,7 +347,9 @@ public class WuKong extends ElementObj {
         else if (key == java.awt.event.KeyEvent.VK_D) {
             if (bl) {
                 dPressed = true;
-                isLeft = false;
+                if (!attackLock) {
+                    isLeft = false;
+                }
                 // 只有没挥棒、没跳跃时，按D键才会触发走路/奔跑！
                 if (!attackLock && !isJumping) {
                     setAction(dClickCount == 1 ? "run" : "walk");
@@ -593,8 +625,9 @@ public class WuKong extends ElementObj {
         // =======================================================
         // 第二层：【绘制大圣本体】 (先画人物)
         // =======================================================
-        if (!frames.isEmpty() && currentFrame < frames.size()) {
-            java.awt.image.BufferedImage currentImage = frames.get(currentFrame);
+        List<BufferedImage> activeFrames = hasArmorEquipped ? armorFrames : frames;
+        if (!activeFrames.isEmpty() && currentFrame < activeFrames.size()) {
+            java.awt.image.BufferedImage currentImage = activeFrames.get(currentFrame);
             
             if (!isLeft) { // 右翻转
                 java.awt.Graphics2D g2dFlip = (java.awt.Graphics2D) g.create();  
@@ -846,10 +879,16 @@ public class WuKong extends ElementObj {
     }
     // 获取当前帧
     public BufferedImage getCurrentFrame() {
-        if (!frames.isEmpty() && currentFrame < frames.size()) {
-            return frames.get(currentFrame);
+        List<BufferedImage> activeFrames = hasArmorEquipped ? armorFrames : frames;
+        if (!activeFrames.isEmpty() && currentFrame < activeFrames.size()) {
+            return activeFrames.get(currentFrame);
         }
         return null;
+    }
+
+    // 获取当前帧索引（用于预览绘制）
+    public int getCurrentFrameIndex() {
+        return currentFrame;
     }
     
     // 获取总帧数
@@ -894,9 +933,31 @@ public class WuKong extends ElementObj {
     public void setMp(int mp) { this.mp = Math.min(mp, maxMp); }
     public int getMaxMp() { return maxMp; }
     public void setMaxMp(int maxMp) { this.maxMp = maxMp; }
+    public int getAttackPower() { return attackPower; }
+
+    public void addAttackPower(int delta) {
+        this.attackPower = Math.max(0, this.attackPower + delta);
+    }
+
+    public void addMaxHp(int delta) {
+        this.maxHp = Math.max(1, this.maxHp + delta);
+        if (this.hp > this.maxHp) {
+            this.hp = this.maxHp;
+        } else if (delta > 0) {
+            this.hp = Math.min(this.maxHp, this.hp + delta);
+        }
+    }
 
     public Inventory getInventory() {
         return inventory;
+    }
+
+    public void setArmorEquipped(boolean equipped) {
+        this.hasArmorEquipped = equipped;
+    }
+
+    public boolean hasArmorEquipped() {
+        return hasArmorEquipped;
     }
 
     // ==========================================================
