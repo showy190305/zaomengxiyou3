@@ -1,160 +1,277 @@
 package com.tedu.element;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
 import java.util.List;
 
 import javax.swing.JPanel;
 
-/**
- * 背包UI面板
- * 在游戏窗口内绘制覆盖层，显示背包中的物品，支持点击使用
- */
 public class InventoryPanel extends JPanel {
-	
-	private static final int PANEL_WIDTH = 480;
-	private static final int PANEL_HEIGHT = 360;
-	private static final int GRID_COLS = 6;
-	private static final int GRID_ROWS = 4;
-	private static final int SLOT_SIZE = 64;
-	private static final int SLOT_GAP = 8;
-	private static final int PADDING = 20;
-	
-	private Inventory inventory;
-	private WuKong player;
-	private boolean visible = false;
-	
-	public InventoryPanel(WuKong player) {
-		this.player = player;
-		this.inventory = Inventory.getInstance();
-		
-		// 计算面板实际大小
-		int contentWidth = GRID_COLS * SLOT_SIZE + (GRID_COLS - 1) * SLOT_GAP;
-		int contentHeight = GRID_ROWS * SLOT_SIZE + (GRID_ROWS - 1) * SLOT_GAP;
-		this.setPreferredSize(new java.awt.Dimension(
-			contentWidth + PADDING * 2,
-			contentHeight + PADDING * 2 + 30 // 30 for title area
-		));
-	}
-	
-	/**
-	 * 切换背包显示/隐藏
-	 */
-	public void toggleVisibility() {
-		visible = !visible;
-	}
-	
-	public boolean isVisible() {
-		return visible;
-	}
-	
-	/**
-	 * 处理鼠标点击，判断是否点击了某个格子
-	 * 由调用方面板转发鼠标事件到此方法
-	 */
-	public void handleClick(int x, int y) {
-		if (!visible) return;
-		
-		int contentWidth = GRID_COLS * SLOT_SIZE + (GRID_COLS - 1) * SLOT_GAP;
-		int contentHeight = GRID_ROWS * SLOT_SIZE + (GRID_ROWS - 1) * SLOT_GAP;
-		int offsetX = (getWidth() - contentWidth) / 2;
-		int offsetY = (getHeight() - contentHeight) / 2 + 30;
-		
-		// 计算点击的是哪个格子
-		for (int row = 0; row < GRID_ROWS; row++) {
-			for (int col = 0; col < GRID_COLS; col++) {
-				int slotX = offsetX + col * (SLOT_SIZE + SLOT_GAP);
-				int slotY = offsetY + row * (SLOT_SIZE + SLOT_GAP);
-				
-				if (x >= slotX && x < slotX + SLOT_SIZE &&
-					y >= slotY && y < slotY + SLOT_SIZE) {
-					
-					int index = row * GRID_COLS + col;
-					List<InventoryItem> items = inventory.getItems();
-					if (index < items.size()) {
-						// 使用道具
-						inventory.useItem(index, player);
-						repaint();
-						return;
-					}
-				}
-			}
-		}
-	}
-	
-	@Override
-	public void paintComponent(Graphics g) {
-		super.paintComponent(g);
-		
-		if (!visible) return;
-		
-		// 绘制半透明黑色背景
-		g.setColor(new Color(0, 0, 0, 180));
-		g.fillRect(0, 0, getWidth(), getHeight());
-		
-		// 绘制背包面板背景
-		int contentWidth = GRID_COLS * SLOT_SIZE + (GRID_COLS - 1) * SLOT_GAP;
-		int contentHeight = GRID_ROWS * SLOT_SIZE + (GRID_ROWS - 1) * SLOT_GAP;
-		int offsetX = (getWidth() - contentWidth) / 2;
-		int offsetY = (getHeight() - contentHeight) / 2 + 30;
-		
-		g.setColor(new Color(40, 40, 60));
-		g.fillRect(offsetX - 5, offsetY - 5, contentWidth + 10, contentHeight + 10);
-		g.setColor(new Color(100, 100, 140));
-		g.drawRect(offsetX - 5, offsetY - 5, contentWidth + 10, contentHeight + 10);
-		
-		// 绘制标题
-		g.setColor(Color.WHITE);
-		g.setFont(new Font("SansSerif", Font.BOLD, 16));
-		g.drawString("Inventory (Click to Use)", offsetX, offsetY - 12);
-		
-		// 绘制格子
-		List<InventoryItem> items = inventory.getItems();
-		for (int row = 0; row < GRID_ROWS; row++) {
-			for (int col = 0; col < GRID_COLS; col++) {
-				int index = row * GRID_COLS + col;
-				int slotX = offsetX + col * (SLOT_SIZE + SLOT_GAP);
-				int slotY = offsetY + row * (SLOT_SIZE + SLOT_GAP);
-				
-				// 格子背景
-				g.setColor(new Color(60, 60, 80));
-				g.fillRect(slotX, slotY, SLOT_SIZE, SLOT_SIZE);
-				g.setColor(new Color(120, 120, 160));
-				g.drawRect(slotX, slotY, SLOT_SIZE, SLOT_SIZE);
-				
-				// 绘制物品
-				if (index < items.size()) {
-					InventoryItem invItem = items.get(index);
-					Item item = invItem.getItem();
-					
-					// 绘制道具图标（缩放适配格子大小）
-					if (item.getIcon() != null) {
-						g.drawImage(item.getIcon().getImage(),
-							slotX + 4, slotY + 4,
-							SLOT_SIZE - 8, SLOT_SIZE - 8, null);
-					} else {
-						// 没有图标时用占位色
-						g.setColor(item.getItemColor());
-						g.fillOval(slotX + 8, slotY + 8, SLOT_SIZE - 16, SLOT_SIZE - 16);
-					}
-					
-					// 绘制数量
-					if (invItem.getQuantity() > 1) {
-						g.setColor(Color.WHITE);
-						g.setFont(new Font("SansSerif", Font.BOLD, 12));
-						String qtyText = "x" + invItem.getQuantity();
-						g.drawString(qtyText, slotX + SLOT_SIZE - 20, slotY + SLOT_SIZE - 6);
-					}
-					
-					// 绘制道具名称
-					g.setColor(new Color(200, 200, 255));
-					g.setFont(new Font("SansSerif", Font.PLAIN, 10));
-					String name = invItem.getDisplayName();
-					int nameWidth = g.getFontMetrics().stringWidth(name);
-					g.drawString(name, slotX + (SLOT_SIZE - nameWidth) / 2, slotY + SLOT_SIZE - 2);
-				}
-			}
-		}
-	}
+    private static final int GRID_COLS = 6;
+    private static final int GRID_ROWS = 4;
+    private static final int SLOT_SIZE = 64;
+    private static final int SLOT_GAP = 10;
+
+    private final Inventory inventory;
+    private final WuKong player;
+    private boolean visible = false;
+
+    private final Rectangle leftPanelRect = new Rectangle();
+    private final Rectangle rightPanelRect = new Rectangle();
+    private final Rectangle previewRect = new Rectangle();
+    private final Rectangle weaponSlotRect = new Rectangle();
+    private final Rectangle armorSlotRect = new Rectangle();
+    private final Rectangle[] bagSlotRects = new Rectangle[GRID_COLS * GRID_ROWS];
+
+    public InventoryPanel(WuKong player) {
+        this.player = player;
+        this.inventory = Inventory.getInstance();
+        for (int i = 0; i < bagSlotRects.length; i++) {
+            bagSlotRects[i] = new Rectangle();
+        }
+    }
+
+    public void toggleVisibility() {
+        visible = !visible;
+    }
+
+    public boolean isVisible() {
+        return visible;
+    }
+
+    public void handleClick(int x, int y) {
+        if (!visible) {
+            return;
+        }
+
+        updateLayout();
+        if (weaponSlotRect.contains(x, y)) {
+            inventory.unequip(EquipmentSlot.WEAPON, player);
+            repaint();
+            return;
+        }
+        if (armorSlotRect.contains(x, y)) {
+            inventory.unequip(EquipmentSlot.ARMOR, player);
+            repaint();
+            return;
+        }
+
+        List<InventoryItem> items = inventory.getItems();
+        for (int i = 0; i < bagSlotRects.length; i++) {
+            if (!bagSlotRects[i].contains(x, y) || i >= items.size()) {
+                continue;
+            }
+            Item item = items.get(i).getItem();
+            if (item.isEquipable()) {
+                inventory.equipItem(i, player);
+            } else {
+                inventory.useItem(i, player);
+            }
+            repaint();
+            return;
+        }
+    }
+
+    @Override
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (!visible) {
+            return;
+        }
+
+        updateLayout();
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        g2.setColor(new Color(0, 0, 0, 175));
+        g2.fillRect(0, 0, getWidth(), getHeight());
+
+        drawPanelBackground(g2, leftPanelRect);
+        drawPanelBackground(g2, rightPanelRect);
+        drawHeader(g2);
+        drawStats(g2);
+        drawPreview(g2);
+        drawEquipment(g2);
+        drawBag(g2);
+        g2.dispose();
+    }
+
+    private void updateLayout() {
+        int totalWidth = Math.min(980, getWidth() - 80);
+        int totalHeight = Math.min(620, getHeight() - 80);
+        int startX = (getWidth() - totalWidth) / 2;
+        int startY = (getHeight() - totalHeight) / 2;
+
+        int leftWidth = 390;
+        leftPanelRect.setBounds(startX, startY, leftWidth, totalHeight);
+        rightPanelRect.setBounds(startX + leftWidth + 20, startY, totalWidth - leftWidth - 20, totalHeight);
+
+        previewRect.setBounds(leftPanelRect.x + 28, leftPanelRect.y + 136, 186, 218);
+        weaponSlotRect.setBounds(leftPanelRect.x + 252, leftPanelRect.y + 164, 78, 78);
+        armorSlotRect.setBounds(leftPanelRect.x + 252, leftPanelRect.y + 264, 78, 78);
+
+        int gridStartX = rightPanelRect.x + 24;
+        int gridStartY = rightPanelRect.y + 100;
+        for (int row = 0; row < GRID_ROWS; row++) {
+            for (int col = 0; col < GRID_COLS; col++) {
+                int index = row * GRID_COLS + col;
+                bagSlotRects[index].setBounds(
+                    gridStartX + col * (SLOT_SIZE + SLOT_GAP),
+                    gridStartY + row * (SLOT_SIZE + SLOT_GAP),
+                    SLOT_SIZE,
+                    SLOT_SIZE
+                );
+            }
+        }
+    }
+
+    private void drawPanelBackground(Graphics2D g2, Rectangle rect) {
+        g2.setColor(new Color(36, 23, 14, 236));
+        g2.fillRoundRect(rect.x, rect.y, rect.width, rect.height, 18, 18);
+        g2.setColor(new Color(197, 162, 99));
+        g2.setStroke(new BasicStroke(3f));
+        g2.drawRoundRect(rect.x, rect.y, rect.width, rect.height, 18, 18);
+    }
+
+    private void drawHeader(Graphics2D g2) {
+        g2.setColor(new Color(245, 214, 133));
+        g2.setFont(new Font("SansSerif", Font.BOLD, 28));
+        g2.drawString("Profile", leftPanelRect.x + 18, leftPanelRect.y + 40);
+
+        g2.setFont(new Font("SansSerif", Font.BOLD, 22));
+        g2.drawString("Bag", rightPanelRect.x + 20, rightPanelRect.y + 40);
+    }
+
+    private void drawStats(Graphics2D g2) {
+        int x = leftPanelRect.x + 22;
+        int topY = leftPanelRect.y + 62;
+        int bottomY = leftPanelRect.y + 390;
+        int labelW = 86;
+        int valueW = 184;
+        int rowH = 34;
+
+        drawStatRow(g2, x, topY, labelW, valueW, rowH, "Name", "WuKong");
+        drawStatRow(g2, x, topY + rowH + 8, labelW, valueW, rowH, "Level", String.valueOf(player.level));
+
+        drawStatRow(g2, x, bottomY, labelW, valueW, rowH, "HP", player.getHp() + " / " + player.getMaxHp());
+        drawStatRow(g2, x, bottomY + rowH + 8, labelW, valueW, rowH, "MP", player.getMp() + " / " + player.getMaxMp());
+        drawStatRow(g2, x, bottomY + (rowH + 8) * 2, labelW, valueW, rowH, "ATK", String.valueOf(player.getAttackPower()));
+    }
+
+    private void drawStatRow(Graphics2D g2, int x, int y, int labelW, int valueW, int h, String label, String value) {
+        g2.setColor(new Color(102, 64, 35));
+        g2.fillRoundRect(x, y, labelW, h, 10, 10);
+        g2.fillRoundRect(x + labelW + 8, y, valueW, h, 10, 10);
+        g2.setColor(new Color(220, 190, 123));
+        g2.drawRoundRect(x, y, labelW, h, 10, 10);
+        g2.drawRoundRect(x + labelW + 8, y, valueW, h, 10, 10);
+
+        g2.setColor(new Color(244, 225, 173));
+        g2.setFont(new Font("SansSerif", Font.BOLD, 16));
+        g2.drawString(label, x + 14, y + 22);
+
+        g2.setColor(Color.WHITE);
+        g2.drawString(value, x + labelW + 20, y + 22);
+    }
+
+    private void drawPreview(Graphics2D g2) {
+        g2.setColor(new Color(86, 54, 28));
+        g2.fillRoundRect(previewRect.x, previewRect.y, previewRect.width, previewRect.height, 18, 18);
+        g2.setColor(new Color(198, 164, 106));
+        g2.drawRoundRect(previewRect.x, previewRect.y, previewRect.width, previewRect.height, 18, 18);
+
+        BufferedImage frame = player.getCurrentFrame();
+        if (frame != null) {
+            int drawW = 150;
+            int drawH = 150;
+            int drawX = previewRect.x + (previewRect.width - drawW) / 2;
+            int drawY = previewRect.y + 42;
+            g2.drawImage(frame, drawX, drawY, drawW, drawH, null);
+        } else {
+            g2.setColor(new Color(255, 215, 120));
+            g2.fillOval(previewRect.x + 48, previewRect.y + 48, 90, 110);
+        }
+
+        g2.setColor(new Color(244, 225, 173));
+        g2.setFont(new Font("SansSerif", Font.BOLD, 18));
+        g2.drawString("Preview", previewRect.x + 50, previewRect.y + 26);
+    }
+
+    private void drawEquipment(Graphics2D g2) {
+        drawEquipmentSlot(g2, weaponSlotRect, "Staff", inventory.getEquippedWeapon());
+        drawEquipmentSlot(g2, armorSlotRect, "Armor", inventory.getEquippedArmor());
+    }
+
+    private void drawEquipmentSlot(Graphics2D g2, Rectangle rect, String label, InventoryItem item) {
+        g2.setColor(new Color(114, 75, 43));
+        g2.fillRoundRect(rect.x, rect.y, rect.width, rect.height, 14, 14);
+        g2.setColor(new Color(220, 190, 123));
+        g2.drawRoundRect(rect.x, rect.y, rect.width, rect.height, 14, 14);
+
+        g2.setColor(new Color(244, 225, 173));
+        g2.setFont(new Font("SansSerif", Font.BOLD, 15));
+        g2.drawString(label, rect.x + 12, rect.y - 8);
+
+        if (item == null) {
+            g2.setColor(new Color(225, 198, 156));
+            g2.setFont(new Font("SansSerif", Font.PLAIN, 13));
+            g2.drawString("Empty", rect.x + 16, rect.y + 43);
+            return;
+        }
+
+        drawItemIcon(g2, rect, item);
+    }
+
+    private void drawBag(Graphics2D g2) {
+        List<InventoryItem> items = inventory.getItems();
+        g2.setColor(new Color(244, 225, 173));
+        g2.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        g2.drawString("Click item to use or equip. Click left slots to unequip.", rightPanelRect.x + 20, rightPanelRect.y + 68);
+
+        for (int i = 0; i < bagSlotRects.length; i++) {
+            Rectangle rect = bagSlotRects[i];
+            g2.setColor(new Color(111, 73, 43));
+            g2.fillRoundRect(rect.x, rect.y, rect.width, rect.height, 10, 10);
+            g2.setColor(new Color(198, 164, 106));
+            g2.drawRoundRect(rect.x, rect.y, rect.width, rect.height, 10, 10);
+
+            if (i < items.size()) {
+                drawItemIcon(g2, rect, items.get(i));
+            }
+        }
+
+        g2.setColor(new Color(244, 225, 173));
+        g2.setFont(new Font("SansSerif", Font.BOLD, 18));
+        g2.drawString("Slots " + items.size() + " / " + inventory.getMaxSlots(), rightPanelRect.x + 20, rightPanelRect.y + rightPanelRect.height - 24);
+    }
+
+    private void drawItemIcon(Graphics2D g2, Rectangle rect, InventoryItem invItem) {
+        Item item = invItem.getItem();
+        if (item.getIcon() != null) {
+            g2.drawImage(item.getIcon().getImage(), rect.x + 6, rect.y + 6, rect.width - 12, rect.height - 12, null);
+        } else {
+            g2.setColor(item.getItemColor());
+            g2.fillOval(rect.x + 12, rect.y + 12, rect.width - 24, rect.height - 24);
+            g2.setColor(Color.WHITE);
+            g2.drawOval(rect.x + 12, rect.y + 12, rect.width - 24, rect.height - 24);
+        }
+
+        if (invItem.getQuantity() > 1) {
+            g2.setColor(Color.WHITE);
+            g2.setFont(new Font("SansSerif", Font.BOLD, 12));
+            g2.drawString("x" + invItem.getQuantity(), rect.x + rect.width - 24, rect.y + rect.height - 8);
+        }
+
+        g2.setColor(new Color(251, 240, 214));
+        g2.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        String name = invItem.getDisplayName();
+        String shortName = name.length() > 5 ? name.substring(0, 5) : name;
+        g2.drawString(shortName, rect.x + 8, rect.y + 18);
+    }
 }

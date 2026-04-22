@@ -11,7 +11,12 @@ import java.util.Set;
 
 import javax.swing.ImageIcon;
 
+import com.tedu.element.ArmorItem;
+import com.tedu.element.BloodPotion;
 import com.tedu.element.ElementObj;
+import com.tedu.element.Inventory;
+import com.tedu.element.ManaPotion;
+import com.tedu.element.StaffItem;
 import com.tedu.element.WuKong;
 
 /**
@@ -112,6 +117,14 @@ public class GameLoad {
         
         
         em.addElement(wukong, GameElement.PLAY);
+        Inventory inventory = Inventory.getInstance();
+        if (inventory.getItems().isEmpty() && inventory.getEquippedWeapon() == null && inventory.getEquippedArmor() == null) {
+            inventory.addItem(new StaffItem("StarterStaff", 18, null));
+            inventory.addItem(new ArmorItem("StarterArmor", 40, null));
+            inventory.addItem(new BloodPotion());
+            inventory.addItem(new BloodPotion());
+            inventory.addItem(new ManaPotion());
+        }
 
         // 确保状态被重置为满血满蓝
         java.util.List<com.tedu.element.ElementObj> list = 

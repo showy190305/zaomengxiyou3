@@ -892,6 +892,20 @@ public class WuKong extends ElementObj {
     public void setMp(int mp) { this.mp = Math.min(mp, maxMp); }
     public int getMaxMp() { return maxMp; }
     public void setMaxMp(int maxMp) { this.maxMp = maxMp; }
+    public int getAttackPower() { return attackPower; }
+
+    public void addAttackPower(int delta) {
+        this.attackPower = Math.max(0, this.attackPower + delta);
+    }
+
+    public void addMaxHp(int delta) {
+        this.maxHp = Math.max(1, this.maxHp + delta);
+        if (this.hp > this.maxHp) {
+            this.hp = this.maxHp;
+        } else if (delta > 0) {
+            this.hp = Math.min(this.maxHp, this.hp + delta);
+        }
+    }
 
     public Inventory getInventory() {
         return inventory;

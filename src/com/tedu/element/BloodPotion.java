@@ -1,49 +1,41 @@
 package com.tedu.element;
 
 import java.awt.Color;
-import java.io.File;
 
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
-/**
- * 血瓶道具 - 恢复玩家HP
- */
 public class BloodPotion extends Item {
+    private static final int DEFAULT_HEAL = 30;
 
-	// 默认恢复30点HP
-	private static final int DEFAULT_HEAL = 30;
+    public BloodPotion() {
+        super();
+        this.value = DEFAULT_HEAL;
+        this.displayName = "HPPot";
+        this.setIcon(new ImageIcon("image/item/health.png"));
+    }
 
-	public BloodPotion() {
-		super();
-		this.value = DEFAULT_HEAL;
-		this.setIcon(new ImageIcon("image/item/health.png"));
-	}
+    public BloodPotion(int x, int y, int w, int h, ImageIcon icon, int value) {
+        super(x, y, w, h, icon, value);
+        this.displayName = "HPPot";
+        this.setIcon(new ImageIcon("image/item/health.png"));
+    }
 
-	public BloodPotion(int x, int y, int w, int h, ImageIcon icon, int value) {
-		super(x, y, w, h, icon, value);
-		this.setIcon(new ImageIcon("image/item/health.png"));
+    public BloodPotion(int x, int y) {
+        super(x, y, 30, 30, null, DEFAULT_HEAL);
+        this.displayName = "HPPot";
+        this.setIcon(new ImageIcon("image/item/health.png"));
+    }
 
-	}
+    @Override
+    public void applyEffect(WuKong player) {
+        if (player != null) {
+            player.recoverHp(value);
+            this.setLive(false);
+        }
+    }
 
-	public BloodPotion(int x, int y) {
-		super(x, y, 30, 30, null, DEFAULT_HEAL);
-		this.setIcon(new ImageIcon("image/item/health.png"));
-
-	}
-
-	@Override
-	public void applyEffect(WuKong player) {
-		if (player != null) {
-			// 恢复玩家HP
-			player.recoverHp(value);
-			// 拾取后标记为不存在
-			this.setLive(false);
-		}
-	}
-
-	@Override
-	protected Color getItemColor() {
-		return Color.RED;
-	}
+    @Override
+    protected Color getItemColor() {
+        return Color.RED;
+    }
 }
