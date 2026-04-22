@@ -157,32 +157,40 @@ public class Weapon extends ElementObj {
     @Override
     public void showElement(Graphics g) {
         // A. 尋找主人 (大聖)
+        WuKong wk = null;
         try {
             java.util.List<ElementObj> players = com.tedu.manager.ElementManager.getManager().getElementsByKey(com.tedu.manager.GameElement.PLAY);
             for (ElementObj obj : players) {
                 if (obj instanceof WuKong) {
-                    WuKong wk = (WuKong) obj;
-                    
-                    // B. 強制拷貝大聖的所有狀態！絕不自己計算！
-                    this.setX(wk.getX());
-                    this.setY(wk.getY());
-                    this.isLeft = wk.getIsLeft(); // 確保 WuKong 有這個 Getter
-                    this.currentAction = wk.getCurrentAction();
-                    
-                    // C. 獲取大聖當前動作播到了第幾幀
-                    int wkFrameIndex = wk.getCurrentActionFrameIndex();
-                    
-                    // D. 在武器的動作字典裡，找出對應的那張圖
-                    List<Integer> actionFrames = actionGroups.get(this.currentAction);
-                    if (actionFrames != null && !actionFrames.isEmpty()) {
-                        // 防越界保護（萬一大聖的 hit 有3幀，武器的 hit 只有1幀，用取模確保安全）
-                        int safeIndex = wkFrameIndex % actionFrames.size();
-                        this.currentFrame = actionFrames.get(safeIndex);
-                    }
-                    break; // 找到大聖就退出循環
+                    wk = (WuKong) obj;
+                    break;
                 }
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            System.out.println("武器: 查找大圣失败 - " + e.getMessage());
+        }
+        
+        // 如果没找到大圣，跳过渲染
+        if (wk == null) {
+            return;
+        }
+        
+        // B. 強制拷貝大聖的所有狀態！絕不自己計算！
+        this.setX(wk.getX());
+        this.setY(wk.getY());
+        this.isLeft = wk.getIsLeft();
+        this.currentAction = wk.getCurrentAction();
+        
+        // C. 獲取大聖當前動作播到了第幾幀
+        int wkFrameIndex = wk.getCurrentActionFrameIndex();
+        
+        // D. 在武器的動作字典裡，找出對應的那張圖
+        List<Integer> actionFrames = actionGroups.get(this.currentAction);
+        if (actionFrames != null && !actionFrames.isEmpty()) {
+            // 防越界保護（萬一大聖的 hit 有3幀，武器的 hit 只有1幀，用取模確保安全）
+            int safeIndex = wkFrameIndex % actionFrames.size();
+            this.currentFrame = actionFrames.get(safeIndex);
+        }
 
         // E. 最終渲染 (帶攝影機偏移和鏡像翻轉)
         List<BufferedImage> activeFrames = hasStaffEquipped ? staffFrames : frames;

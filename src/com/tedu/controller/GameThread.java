@@ -310,15 +310,32 @@ public class GameThread extends Thread {
             return;
         }
 
-        Item drop = createRandomPotion(enemy);
+        // Boss掉落装备，普通怪物掉落药水
+        Item drop = createDrop(enemy);
         em.addElement(drop, GameElement.ITEM);
         enemy.markDropGenerated();
         System.out.println("怪物掉落: " + drop.getClass().getSimpleName());
     }
 
-    private Item createRandomPotion(BaseEnemy enemy) {
+    private Item createDrop(BaseEnemy enemy) {
         int dropX = enemy.getX() + enemy.getW() / 2 - 15;
         int dropY = enemy.getY() + enemy.getH() - 40;
-        return DROP_RANDOM.nextBoolean() ? new BloodPotion(dropX, dropY) : new ManaPotion(dropX, dropY);
+        
+        // 根据Boss类型掉落对应装备
+        String enemyType = enemy.getClass().getSimpleName();
+        
+        if ("boss1".equals(enemyType)) {
+            // Boss1掉落金箍棒
+            System.out.println("✨ Boss1掉落专属武器：金箍棒！");
+            return new com.tedu.element.BossStaffItem(dropX, dropY);
+        } else if ("boss2".equals(enemyType)) {
+            // Boss2掉落锁子黄金甲
+            System.out.println("✨ Boss2掉落专属护甲：锁子黄金甲！");
+            return new com.tedu.element.BossArmorItem(dropX, dropY);
+        } else {
+            // 普通怪物掉落药水
+            return DROP_RANDOM.nextBoolean() ? 
+                new BloodPotion(dropX, dropY) : new ManaPotion(dropX, dropY);
+        }
     }
 }

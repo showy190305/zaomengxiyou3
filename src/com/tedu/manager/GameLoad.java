@@ -140,9 +140,9 @@ public class GameLoad {
         
         em.addElement(wukong, GameElement.PLAY);
         Inventory inventory = Inventory.getInstance();
+        // 初始空背包，装备需要通过击败Boss获得
         if (inventory.getItems().isEmpty() && inventory.getEquippedWeapon() == null && inventory.getEquippedArmor() == null) {
-            inventory.addItem(new StaffItem("StarterStaff", 18, new javax.swing.ImageIcon("image/icons/staff_icon.png")));
-            inventory.addItem(new ArmorItem("StarterArmor", 40, new javax.swing.ImageIcon("image/icons/armor_icon.png")));
+            // 初始只给少量药水
             inventory.addItem(new BloodPotion());
             inventory.addItem(new BloodPotion());
             inventory.addItem(new ManaPotion());

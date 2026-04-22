@@ -4,14 +4,23 @@ import java.awt.Color;
 
 import javax.swing.ImageIcon;
 
-public class StaffItem extends Item implements EquipableItem {
+/**
+ * Boss1掉落的专属武器 - 金箍棒
+ */
+public class BossStaffItem extends Item implements EquipableItem {
     private final int attackBonus;
 
-    public StaffItem() {
-        this("Staff", 18, null);
+    public BossStaffItem() {
+        this("金箍棒", 30, new javax.swing.ImageIcon("image/icons/staff_icon.png"));
     }
 
-    public StaffItem(String name, int attackBonus, ImageIcon icon) {
+    public BossStaffItem(int x, int y) {
+        super(x, y, 30, 30, new javax.swing.ImageIcon("image/icons/staff_icon.png"), 30);
+        this.attackBonus = 30;
+        this.displayName = "金箍棒";
+    }
+
+    public BossStaffItem(String name, int attackBonus, ImageIcon icon) {
         super(0, 0, 30, 30, icon, attackBonus);
         this.attackBonus = attackBonus;
         this.displayName = name;
@@ -28,7 +37,7 @@ public class StaffItem extends Item implements EquipableItem {
 
     @Override
     protected Color getItemColor() {
-        return new Color(123, 72, 29);
+        return new Color(255, 215, 0); // 金色
     }
 
     @Override
@@ -59,7 +68,7 @@ public class StaffItem extends Item implements EquipableItem {
             for (ElementObj obj : plays) {
                 if (obj instanceof com.tedu.element.Weapon) {
                     ((com.tedu.element.Weapon) obj).setStaffEquipped(equipped);
-                    System.out.println("武器状态已更新: " + (equipped ? "装备法杖" : "卸下法杖"));
+                    System.out.println("武器状态已更新: " + (equipped ? "装备金箍棒" : "卸下金箍棒"));
                     break;
                 }
             }

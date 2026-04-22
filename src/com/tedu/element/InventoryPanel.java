@@ -219,19 +219,17 @@ public class InventoryPanel extends JPanel {
             g2.fillOval(previewRect.x + 48, previewRect.y + 48, 90, 110);
         }
 
-        // 叠加武器帧（仅在没有装备护甲时才叠加，因为armor_yellow已包含武器）
-        if (!player.hasArmorEquipped()) {
-            java.awt.image.BufferedImage weaponFrame = getWeaponFrame(playerFrameIndex, currentAction);
-            if (weaponFrame != null) {
-                if (!player.getIsLeft()) {
-                    Graphics2D g2Flip = (Graphics2D) g2.create();
-                    g2Flip.translate(drawX + drawW, drawY);
-                    g2Flip.scale(-1, 1);
-                    g2Flip.drawImage(weaponFrame, 0, 0, drawW, drawH, null);
-                    g2Flip.dispose();
-                } else {
-                    g2.drawImage(weaponFrame, drawX, drawY, drawW, drawH, null);
-                }
+        // 叠加武器帧（始终显示，根据装备状态选择基础武器或法杖）
+        java.awt.image.BufferedImage weaponFrame = getWeaponFrame(playerFrameIndex, currentAction);
+        if (weaponFrame != null) {
+            if (!player.getIsLeft()) {
+                Graphics2D g2Flip = (Graphics2D) g2.create();
+                g2Flip.translate(drawX + drawW, drawY);
+                g2Flip.scale(-1, 1);
+                g2Flip.drawImage(weaponFrame, 0, 0, drawW, drawH, null);
+                g2Flip.dispose();
+            } else {
+                g2.drawImage(weaponFrame, drawX, drawY, drawW, drawH, null);
             }
         }
 
