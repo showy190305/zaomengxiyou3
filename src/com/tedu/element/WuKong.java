@@ -328,7 +328,9 @@ public class WuKong extends ElementObj {
         else if (key == java.awt.event.KeyEvent.VK_A) {
             if (bl) {
                 aPressed = true;
-                isLeft = true;
+                if (!attackLock) {
+                    isLeft = true;
+                }
                 // 只有没挥棒、没跳跃时，按A键才会触发走路/奔跑！
                 if (!attackLock && !isJumping) {
                     setAction(aClickCount == 1 ? "run" : "walk");
@@ -345,7 +347,9 @@ public class WuKong extends ElementObj {
         else if (key == java.awt.event.KeyEvent.VK_D) {
             if (bl) {
                 dPressed = true;
-                isLeft = false;
+                if (!attackLock) {
+                    isLeft = false;
+                }
                 // 只有没挥棒、没跳跃时，按D键才会触发走路/奔跑！
                 if (!attackLock && !isJumping) {
                     setAction(dClickCount == 1 ? "run" : "walk");
