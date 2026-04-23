@@ -19,8 +19,8 @@ import javax.swing.JPanel;
  *       4.显示窗体
  */
 public class GameJFrame extends JFrame{
-	public static int GameX = 800;//GAMEX 
-	public static int GameY = 600;
+	public static int GameX = 1000;//GAMEX 
+	public static int GameY = 630;
 	private JPanel jPanel =null; //正在现实的面板
 	private KeyListener  keyListener=null;//键盘监听
 	private MouseMotionListener mouseMotionListener=null; //鼠标监听
@@ -32,7 +32,7 @@ public class GameJFrame extends JFrame{
 	}
 	public void init() {
 		this.setSize(GameX, GameY); //设置窗体大小
-		this.setTitle("测试游戏-泡泡堂");
+		this.setTitle("造梦西游3");
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);//设置退出并且关闭
 		this.setLocationRelativeTo(null);//屏幕居中显示
 //		。。。。
@@ -90,10 +90,6 @@ public class GameJFrame extends JFrame{
 	public void setThead(Thread thead) {
 		this.thead = thead;
 	}
-	
-	
-	
-	
 }
 
 

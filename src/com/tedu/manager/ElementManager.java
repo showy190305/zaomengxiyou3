@@ -83,6 +83,18 @@ public class ElementManager {
 //		道具，子弹，爆炸效果，死亡效果。。。。
 	}
 	
+	public void clearAll() {
+        // gameElements 是你存放所有元素的大集合 (Map)
+        if (gameElements != null) {
+            // 遍历所有的分类（玩家、敌人、子弹、地图等），把它们全部倒空！
+            for (java.util.List<com.tedu.element.ElementObj> list : gameElements.values()) {
+                if (list != null) {
+                    list.clear(); 
+                }
+            }
+        }
+        System.out.println("🧹 元素管理器已彻底清空上一局的残留数据！");
+    }
 }
 
 
