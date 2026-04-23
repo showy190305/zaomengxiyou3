@@ -19,7 +19,7 @@ public class InventoryPanel extends JPanel {
     private static final int SLOT_GAP = 10;
 
     private final Inventory inventory;
-    private final WuKong player;
+    private WuKong player;
     private boolean visible = false;
 
     // Cached sprite sheets for preview
@@ -44,6 +44,22 @@ public class InventoryPanel extends JPanel {
         }
     }
 
+    // 【新增】：动态获取当前地图上真正活着的大圣
+    private WuKong getCurrentPlayer() {
+        try {
+            java.util.List<com.tedu.element.ElementObj> players = com.tedu.manager.ElementManager.getManager().getElementsByKey(com.tedu.manager.GameElement.PLAY);
+            if (players != null) {
+                for (com.tedu.element.ElementObj obj : players) {
+                    if (obj instanceof WuKong) {
+                        return (WuKong) obj; // 抓到现任大圣！
+                    }
+                }
+            }
+        } catch (Exception e) {}
+        return this.player; // 如果没抓到，用备用方案
+    }
+
+
     public void toggleVisibility() {
         visible = !visible;
     }
@@ -56,6 +72,9 @@ public class InventoryPanel extends JPanel {
         if (!visible) {
             return;
         }
+
+        this.player = getCurrentPlayer(); // 【新增：每次点击前，确保大圣是最新的！】
+        if (this.player == null) return;
 
         updateLayout();
         if (weaponSlotRect.contains(x, y)) {
@@ -91,7 +110,9 @@ public class InventoryPanel extends JPanel {
         if (!visible) {
             return;
         }
-
+        this.player = getCurrentPlayer(); // 【新增：每次画UI前，确保大圣是最新的！】
+        if (this.player == null) return;
+        
         updateLayout();
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);

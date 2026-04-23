@@ -23,8 +23,8 @@ public class enemy3 extends BaseEnemy {
 
     public enemy3() {
         // 1. 初始化属于 enemy3 的独有数值
-        this.hp = 100;
-        this.maxHp = 100;
+        this.hp = 150;
+        this.maxHp = 150;
         this.expDrop = 30;
         this.walkStep = 1; 
         this.attackRange = 80;

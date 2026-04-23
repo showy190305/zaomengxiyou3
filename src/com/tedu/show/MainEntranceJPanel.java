@@ -19,11 +19,18 @@ import java.awt.event.MouseAdapter;
 // 导入鼠标事件类
 import java.awt.event.MouseEvent;
 
+import javax.imageio.ImageIO;
 // 导入面板基础类
 import javax.swing.JPanel;
 
 import com.tedu.login.PlayerSave;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+import java.awt.BasicStroke;
+import java.awt.Image;
 public class MainEntranceJPanel extends JPanel {
     // 开始游戏按钮的位置和尺寸常量
     private static final int START_BTN_X = 60;  // 开始游戏按钮X坐标
@@ -55,15 +62,46 @@ public class MainEntranceJPanel extends JPanel {
     private int selectedLevel = -1; // 当前选择的关卡
 
     // 假设有5个关卡
-    private static final int LEVEL_COUNT = 5;
+    private static final int LEVEL_COUNT = 3;
     private Rectangle[] levelRects = new Rectangle[LEVEL_COUNT];
+    private BufferedImage[] levelImages = new BufferedImage[LEVEL_COUNT];
+
+    private Image gameIconImage;
 
     /**
      * 构造函数，初始化游戏主入口菜单面板
      * 调用init方法进行具体的初始化操作
      */
     public MainEntranceJPanel() {
+        loadLevelResources();
         init();
+    }
+
+
+    /**
+     * 加载关卡按钮的背景图片
+     */
+    private void loadLevelResources() {
+        try {
+            File iconFile = new File("image/menu/logo.png");
+            // 假设你的路径是 image/menu/level1.png ...
+            for (int i = 0; i < LEVEL_COUNT; i++) {
+                // 如果暂时没图片，这里会报错，可以先用 null 判断或占位图
+                File file = new File("image/menu/level" + (i + 1) + ".png");
+                if (file.exists()) {
+                    levelImages[i] = ImageIO.read(file);
+                }
+            }
+
+            if (iconFile.exists()) {
+                gameIconImage = javax.imageio.ImageIO.read(iconFile);
+                System.out.println("✅ 游戏图标图片加载成功！");
+            }
+
+        } catch (IOException e) {
+            System.err.println("⚠️ 关卡图片加载失败，请检查路径！");
+            System.err.println("⚠️ 警告：游戏图标图片加载失败。请检查路径：image/menu/logo.png");
+        }
     }
 
     /**
@@ -118,12 +156,18 @@ public class MainEntranceJPanel extends JPanel {
      * 设置各个关卡按钮的位置和大小
      */
     private void initializeLevelRects() {
-        int startX = 200; // 关卡按钮起始X坐标
-        int startY = 300; // 关卡按钮起始Y坐标
-        int spacing = 80; // 关卡按钮间距
+        int btnW = 100;    // 既然换成图片了，按钮可以做大一点，比如 100x100
+        int btnH = 100;
+        int spacing = 120; // 按钮中心间距
+        
+        // 计算起始位置，让 3 个按钮在屏幕水平居中
+        // 这里的 800 是假设面板宽度，你可以根据 GameJFrame.GameX 动态调整
+        int totalWidth = (LEVEL_COUNT - 1) * spacing + btnW;
+        int startX = (800 - totalWidth) / 2; 
+        int startY = 350; // 向下挪一点，腾出位置
         
         for (int i = 0; i < LEVEL_COUNT; i++) {
-            levelRects[i] = new Rectangle(startX + i * spacing, startY, 50, 50);
+            levelRects[i] = new Rectangle(startX + i * spacing, startY, btnW, btnH);
         }
     }
 
@@ -241,11 +285,28 @@ public class MainEntranceJPanel extends JPanel {
         // 绘制关卡按钮
         for (int i = 0; i < LEVEL_COUNT; i++) {
             Rectangle rect = levelRects[i];
-            g2.setColor(selectedLevel == i ? Color.ORANGE : Color.LIGHT_GRAY);
-            g2.fillOval(rect.x, rect.y, rect.width, rect.height);
-            g2.setColor(Color.BLACK);
-            g2.drawOval(rect.x, rect.y, rect.width, rect.height);
-            g2.drawString("关卡" + (i + 1), rect.x + 10, rect.y + 35);
+            
+            // 如果有图片就画图片，没图片就画个带渐变的方块垫底
+            if (levelImages[i] != null) {
+                g2.drawImage(levelImages[i], rect.x, rect.y, rect.width, rect.height, null);
+            } else {
+                g2.setColor(selectedLevel == i ? Color.ORANGE : new Color(100, 100, 100, 150));
+                g2.fillRoundRect(rect.x, rect.y, rect.width, rect.height, 15, 15);
+            }
+
+            // 绘制选中的高亮边框
+            if (selectedLevel == i) {
+                g2.setColor(Color.YELLOW);
+                g2.setStroke(new BasicStroke(3));
+                g2.drawRoundRect(rect.x - 2, rect.y - 2, rect.width + 4, rect.height + 4, 15, 15);
+            }
+
+            // 绘制关卡文字
+            g2.setColor(Color.WHITE);
+            g2.setFont(new Font("微软雅黑", Font.BOLD, 18));
+            String levelText = "第 " + (i + 1) + " 关";
+            int textW = g2.getFontMetrics().stringWidth(levelText);
+            g2.drawString(levelText, rect.x + (rect.width - textW) / 2, rect.y + rect.height + 25);
         }
     }
 
@@ -264,11 +325,11 @@ public class MainEntranceJPanel extends JPanel {
         // 绘制背景占位文本
         g2.setColor(new Color(80, 80, 120));  // 灰蓝色文本
         g2.setFont(new Font("SansSerif", Font.ITALIC, 16));  // 设置字体
-        String text = "[ 背景图片占位区域 ]";  // 占位文本
-        // 计算文本的宽度以便居中显示
-        int tw = g2.getFontMetrics().stringWidth(text);
-        // 在面板中央绘制占位文本
-        g2.drawString(text, (w - tw) / 2, h / 2);
+        //String text = "[ 背景图片占位区域 ]";  // 占位文本
+        // // 计算文本的宽度以便居中显示
+        // int tw = g2.getFontMetrics().stringWidth(text);
+        // // 在面板中央绘制占位文本
+        // g2.drawString(text, (w - tw) / 2, h / 2);
     }
 
     /**
@@ -325,21 +386,29 @@ public class MainEntranceJPanel extends JPanel {
      * @param g2 2D图形上下文对象
      */
     private void drawIconBox(Graphics2D g2) {
-        // 设置图标框背景颜色
-        g2.setColor(new Color(40, 40, 70));  // 深紫色背景
-        // 绘制圆角矩形图标框
-        g2.fillRoundRect(ICON_X, ICON_Y, ICON_W, ICON_H, 8, 8);
-        // 设置边框颜色
-        g2.setColor(new Color(100, 100, 150));  // 浅紫色边框
-        // 绘制边框
-        g2.drawRoundRect(ICON_X, ICON_Y, ICON_W, ICON_H, 8, 8);
-        // 设置图标框内文本颜色和字体
+    // 1. 设置图标框背景颜色 (可以保留作为底色，以防图片没加载出来时显得太空)
+    g2.setColor(new Color(40, 40, 70));  // 深紫色背景
+    // 绘制圆角矩形图标框
+    g2.fillRoundRect(ICON_X, ICON_Y, ICON_W, ICON_H, 8, 8);
+    
+    // 2. 绘制边框 (保留边框会让图标看起来像在一个框子里，更精致)
+    g2.setColor(new Color(100, 100, 150));  // 浅紫色边框
+    g2.drawRoundRect(ICON_X, ICON_Y, ICON_W, ICON_H, 8, 8);
+
+    // --- 3. 核心修改：用图片替换占位文字 ---
+    if (gameIconImage != null) {
+        // 绘制图片，将其缩放到图标框的大小 (ICON_W, ICON_H)
+        g2.drawImage(gameIconImage, ICON_X, ICON_Y, ICON_W, ICON_H, null);
+    } else {
+        // 4. [退化方案] 如果图片加载失败，显示原有的占位文字，确保界面不崩溃
         g2.setColor(new Color(120, 120, 160));  // 灰紫色文本
         g2.setFont(new Font("SansSerif", Font.PLAIN, 14));  // 平常字体，14号字
-        String text = "[ 游戏图标 ]";  // 占位文本
+        String text = "[ 🚫 图片加载失败 ]";
+        
         // 计算文本宽度以便居中显示
         int tw = g2.getFontMetrics().stringWidth(text);
         // 在图标框内居中绘制占位文本
         g2.drawString(text, ICON_X + (ICON_W - tw) / 2, ICON_Y + ICON_H / 2);
     }
+}
 }

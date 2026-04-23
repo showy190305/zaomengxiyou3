@@ -317,6 +317,7 @@ public class WuKong extends ElementObj {
                     
                     attackCount++;
                     if (attackCount > 4) attackCount = 1;
+                    com.tedu.manager.SoundManager.playSFX("audio/swing.wav");
                     playAttackByCount(); // 播放对应的攻击动画
                 }
             } else {
@@ -403,7 +404,7 @@ public class WuKong extends ElementObj {
         else if (key == java.awt.event.KeyEvent.VK_L) {
             int mpCost = 40; 
             if (bl && specialSkillTimer <= 0 && specialSkillCooldown <= 0 && !isDead && this.mp >= mpCost) { 
-                
+                com.tedu.manager.SoundManager.playSFX("audio/L.wav");
                 this.mp -= mpCost; 
                 this.specialSkillTimer = 40; 
                 this.specialSkillCooldown = MAX_COOLDOWN; 
@@ -438,7 +439,7 @@ public class WuKong extends ElementObj {
                 
                 com.tedu.element.skill.TornadoDash dash = new com.tedu.element.skill.TornadoDash(dashX, dashY, dashW, dashH, this.isLeft, skillDamage);
                 com.tedu.manager.ElementManager.getManager().addElement(dash, com.tedu.manager.GameElement.PLAY);
-                
+                com.tedu.manager.SoundManager.playSFX("audio/P.wav");
                 System.out.println("💨 龙卷风突进！伤害判定为：" + skillDamage);
             } else if (bl && this.mp < mpCost && dashSkillTimer <= 0) {
                 System.out.println("法力不足！无法突进");

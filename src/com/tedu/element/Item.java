@@ -18,7 +18,16 @@ public abstract class Item extends ElementObj {
     }
 
     public Item(int x, int y, int w, int h, ImageIcon icon, int value) {
-        super(x, y, w, h, icon);
+        super(x, y, w, h, icon); 
+        
+        // ----------------------------------------------------
+        // 【防脱轨护盾】：不管父类有没有存，我自己强行存一遍！
+        this.setX(x);
+        this.setY(y);
+        this.setW(w);
+        this.setH(h);
+        // ----------------------------------------------------
+        
         this.value = value;
         this.displayName = getClass().getSimpleName();
     }

@@ -22,6 +22,11 @@ public class BloodPotion extends Item {
 
     public BloodPotion(int x, int y) {
         super(x, y, 30, 30, null, DEFAULT_HEAL);
+        
+        // 【双保险】：强行把怪物死亡的坐标钉死在血瓶上！
+        this.setX(x);
+        this.setY(y);
+        
         this.displayName = "HPPot";
         this.setIcon(new ImageIcon("image/item/health.png"));
     }

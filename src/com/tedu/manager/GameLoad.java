@@ -119,9 +119,22 @@ public class GameLoad {
      */
     public static void loadPlay() {
         loadPlay(1);  // 默认加载第1关
+        
     }
     
     public static void loadPlay(int levelIndex) {
+        // ==========================================================
+        // 【新增】：根据关卡 ID 播放专属 BGM
+        // ==========================================================
+        String[] levelBGMs = {
+            "audio/bgm_level1.wav", // 第一关音乐
+            "audio/bgm_level2.wav", // 第二关音乐
+            "audio/bgm_level3.wav"  // 第三关音乐
+        };
+        if (levelIndex >= 1 && levelIndex <= 3) {
+            com.tedu.manager.SoundManager.playBGM(levelBGMs[levelIndex - 1]);
+        }
+        // ==========================================================
         // 先加载对象映射，防止反射失败
         loadObj();
 
@@ -219,8 +232,8 @@ public class GameLoad {
             case 1:
                 // 龙宫地图怪物配置，使用enemy3
                 return new EnemySpawnConfig[] {
-                    new EnemySpawnConfig(500,  2, "boss1"),  // 第一波：X=800处，2只enemy3（新手热身）
-                    new EnemySpawnConfig(1000, 3, "boss2"),  // 第二波：X=2000处，3只enemy3
+                    new EnemySpawnConfig(500,  2, "enemy2"),  // 第一波：X=800处，2只enemy3（新手热身）
+                    new EnemySpawnConfig(1000, 3, "enemy2"),  // 第二波：X=2000处，3只enemy3
                     new EnemySpawnConfig(2000, 2, "enemy2"),  // 第三波：X=3800处，2只enemy3
                     new EnemySpawnConfig(3000, 4, "enemy2"),  // 第四波：X=5500处，4只enemy3（小高潮）
                     new EnemySpawnConfig(4000, 5, "enemy2")   // 第五波：X=7500处，5只enemy3（关底大决战）

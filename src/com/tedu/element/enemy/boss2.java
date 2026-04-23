@@ -41,8 +41,8 @@ public class boss2 extends BaseEnemy {
     private static final int SKILL_DAMAGE = 18;
 
     public boss2() {
-        this.hp = 100;
-        this.maxHp = 100;
+        this.hp = 600;
+        this.maxHp = 600;
         this.expDrop = 30;
         this.walkStep = 1;
         this.attackRange = 100;

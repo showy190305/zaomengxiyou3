@@ -33,8 +33,8 @@ public class boss1 extends BaseEnemy {
     private static final int SKILL_COOLDOWN = 180;
 
     public boss1() {
-        this.hp = 100;
-        this.maxHp = 100;
+        this.hp = 300;
+        this.maxHp = 300;
         this.expDrop = 30;
         this.walkStep = 1;
         this.attackRange = 80;

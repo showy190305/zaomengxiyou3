@@ -1,181 +1,261 @@
 package com.tedu.login;
 
-// 导入Swing组件库，用于构建图形用户界面
-import javax.swing.*;
-// 导入AWT包，包含基本的图形和窗口组件
-import java.awt.*;
-// 导入AWT事件包，处理用户交互事件
-import java.awt.event.*;
-// 导入HashMap类
-import java.util.HashMap;
-// 导入登录成功回调接口
-import com.tedu.login.LoginSuccessListener;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.RenderingHints;
+import java.awt.Toolkit;
+import java.awt.Window;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
-/**
- * 登录界面类
- * 继承自JFrame，提供用户登录、注册和存档管理的图形界面
- * 包含用户名密码输入、登录验证、新游戏和继续游戏等功能
- */
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+
 public class LoginFrame extends JFrame {
-    // 登录相关组件
     private JTextField usernameField;
     private JPasswordField passwordField;
     private JPasswordField confirmPasswordField;
-    private JButton loginBtn, registerBtn;
+    private JButton loginBtn;
+    private JButton registerBtn;
 
-    // 主菜单相关组件
-    private JButton newGameBtn, continueBtn, exitBtn;
+    private JButton newGameBtn;
+    private JButton continueBtn;
+    private JButton exitBtn;
+
+    private JPanel loginPanel;
     private JPanel menuPanel;
+    private JLabel confirmPasswordLabel;
+    private boolean menuMode = false;
+    private boolean registerMode = false;
 
-    // 当前登录用户
     private String currentUser = null;
-
-    // 数据管理
-    private DataManager dataManager;
-
-    private LoginSuccessListener loginSuccessListener;
+    private final DataManager dataManager;
+    private final LoginSuccessListener loginSuccessListener;
 
     public LoginFrame(LoginSuccessListener listener) {
         super("造梦西游3 - 登录/存档管理");
         this.loginSuccessListener = listener;
+        this.dataManager = new DataManager();
 
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
-
-        dataManager = new DataManager();
-
-        // 背景面板
         setContentPane(new BgPanel());
-
-        // 登录面板
-        JPanel loginPanel = new JPanel();
-        loginPanel.setOpaque(false);
-        loginPanel.setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
-
-        usernameField = new JTextField(15);
-        passwordField = new JPasswordField(15);
-        confirmPasswordField = new JPasswordField(15);
-        
-        // 设置输入框背景为白色，文字为黑色以符合新设计
-        usernameField.setBackground(Color.WHITE);
-        usernameField.setForeground(Color.BLACK);
-        passwordField.setBackground(Color.WHITE);
-        passwordField.setForeground(Color.BLACK);
-        confirmPasswordField.setBackground(Color.WHITE);
-        confirmPasswordField.setForeground(Color.BLACK);
-        
-        loginBtn = new JButton("登录");
-        registerBtn = new JButton("注册");
-        
-        // 设置按钮样式
-        loginBtn.setBackground(new Color(100, 150, 255));
-        loginBtn.setForeground(Color.WHITE);
-        registerBtn.setBackground(new Color(100, 150, 255));
-        registerBtn.setForeground(Color.WHITE);
-        
-        // 用户名
-        gbc.gridx = 0; gbc.gridy = 0; gbc.anchor = GridBagConstraints.EAST;
-        JLabel usernameLabel = new JLabel("用户名:");
-        usernameLabel.setForeground(Color.WHITE);  // 设置标签文字为白色
-        usernameLabel.setFont(new Font("微软雅黑", Font.PLAIN, 14));
-        loginPanel.add(usernameLabel, gbc);
-        gbc.gridx = 1; gbc.anchor = GridBagConstraints.WEST;
-        loginPanel.add(usernameField, gbc);
-
-        // 密码
-        gbc.gridx = 0; gbc.gridy = 1; gbc.anchor = GridBagConstraints.EAST;
-        JLabel passwordLabel = new JLabel("密码:");
-        passwordLabel.setForeground(Color.WHITE);  // 设置标签文字为白色
-        passwordLabel.setFont(new Font("微软雅黑", Font.PLAIN, 14));
-        loginPanel.add(passwordLabel, gbc);
-        gbc.gridx = 1; gbc.anchor = GridBagConstraints.WEST;
-        loginPanel.add(passwordField, gbc);
-
-        // 确认密码（注册时显示）
-        gbc.gridx = 0; gbc.gridy = 2; gbc.anchor = GridBagConstraints.EAST;
-        JLabel confirmPasswordLabel = new JLabel("确认密码:");
-        confirmPasswordLabel.setForeground(Color.WHITE);  // 设置标签文字为白色
-        confirmPasswordLabel.setFont(new Font("微软雅黑", Font.PLAIN, 14));
-        loginPanel.add(confirmPasswordLabel, gbc);
-        gbc.gridx = 1; gbc.anchor = GridBagConstraints.WEST;
-        loginPanel.add(confirmPasswordField, gbc);
-
-        // 按钮 - 使用单独的GridBagConstraints来确保居中
-        GridBagConstraints btnGbc = new GridBagConstraints();
-        btnGbc.gridx = 0; 
-        btnGbc.gridy = 3; 
-        btnGbc.gridwidth = 2;
-        btnGbc.anchor = GridBagConstraints.CENTER;
-        btnGbc.insets = new Insets(10, 10, 10, 10); // 保持相同的边距
-        
-        // 创建按钮面板并设置为居中
-        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
-        btnPanel.setOpaque(false);
-        btnPanel.add(loginBtn);
-        btnPanel.add(registerBtn);
-        loginPanel.add(btnPanel, btnGbc);
-
-        // 主菜单面板
-        menuPanel = new JPanel();
-        menuPanel.setOpaque(false);
-        menuPanel.setLayout(new FlowLayout());
-        newGameBtn = new JButton("新的游戏");
-        continueBtn = new JButton("继续游戏");
-        exitBtn = new JButton("退出游戏");
-        menuPanel.add(newGameBtn);
-        menuPanel.add(continueBtn);
-        menuPanel.add(exitBtn);
-        menuPanel.setVisible(false);
-
-        // 布局
         setLayout(null);
-        loginPanel.setBounds(250, 150, 300, 220);
-        menuPanel.setBounds(250, 400, 300, 60);
+
+        initLoginPanel();
+        initMenuPanel();
+
         add(loginPanel);
         add(menuPanel);
 
-        // 事件绑定
-        confirmPasswordField.setVisible(false); // 默认隐藏
-        // 将模式切换逻辑整合到ActionListener中以提高Java版本兼容性
-        registerBtn.addActionListener(e -> {
-            SwingUtilities.invokeLater(() -> {
-                confirmPasswordField.setVisible(true);  // 显示确认密码框
-                revalidate();  // 重新验证布局
-                repaint();     // 重绘界面
-            });
-            onRegister();  // 执行注册逻辑
-        });
-        loginBtn.addActionListener(e -> {
-            SwingUtilities.invokeLater(() -> {
-                confirmPasswordField.setVisible(false);  // 隐藏确认密码框
-                revalidate();  // 重新验证布局
-                repaint();     // 重绘界面
-            });
-            onLogin();  // 执行登录逻辑
-        });
-        newGameBtn.addActionListener(e -> onNewGame());
-        continueBtn.addActionListener(e -> onContinueGame());
-        exitBtn.addActionListener(e -> System.exit(0));
-
-        // 窗口关闭时保存数据
         addWindowListener(new WindowAdapter() {
+            @Override
             public void windowClosing(WindowEvent e) {
                 dataManager.saveAccounts();
             }
         });
-
-
     }
 
-    // 注册逻辑
+    private void initLoginPanel() {
+        loginPanel = new JPanel(new GridBagLayout());
+        loginPanel.setOpaque(false);
+        loginPanel.setBounds(250, 155, 320, 210);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.anchor = GridBagConstraints.EAST;
+
+        usernameField = new JTextField(15);
+        passwordField = new JPasswordField(15);
+        confirmPasswordField = new JPasswordField(15);
+
+        styleInput(usernameField);
+        styleInput(passwordField);
+        styleInput(confirmPasswordField);
+
+        loginBtn = new JButton("登录");
+        registerBtn = new JButton("注册");
+        stylePrimaryButton(loginBtn);
+        stylePrimaryButton(registerBtn);
+
+        JLabel usernameLabel = createFormLabel("用户名:");
+        JLabel passwordLabel = createFormLabel("密码:");
+        confirmPasswordLabel = createFormLabel("确认密码:");
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        loginPanel.add(usernameLabel, gbc);
+
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        loginPanel.add(usernameField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.EAST;
+        loginPanel.add(passwordLabel, gbc);
+
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        loginPanel.add(passwordField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.anchor = GridBagConstraints.EAST;
+        loginPanel.add(confirmPasswordLabel, gbc);
+
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        loginPanel.add(confirmPasswordField, gbc);
+
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
+        btnPanel.setOpaque(false);
+        btnPanel.add(loginBtn);
+        btnPanel.add(registerBtn);
+
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        loginPanel.add(btnPanel, gbc);
+
+        confirmPasswordField.setVisible(false);
+        confirmPasswordLabel.setVisible(false);
+
+        registerBtn.addActionListener(e -> {
+            if (!registerMode) {
+                switchToRegisterMode();
+            } else {
+                onRegister();
+            }
+        });
+
+        loginBtn.addActionListener(e -> {
+            if (registerMode) {
+                switchToLoginMode();
+                return;
+            }
+            onLogin();
+        });
+    }
+
+    private void initMenuPanel() {
+        menuPanel = new JPanel();
+        menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
+        menuPanel.setOpaque(false);
+        menuPanel.setBounds(610, 205, 145, 250);
+        menuPanel.setVisible(false);
+
+        newGameBtn = createMenuButton("新的游戏");
+        continueBtn = createMenuButton("继续游戏");
+        exitBtn = createMenuButton("退出游戏");
+
+        newGameBtn.addActionListener(e -> onNewGame());
+        continueBtn.addActionListener(e -> onContinueGame());
+        exitBtn.addActionListener(e -> System.exit(0));
+
+        menuPanel.add(Box.createVerticalStrut(26));
+        menuPanel.add(newGameBtn);
+        menuPanel.add(Box.createVerticalStrut(18));
+        menuPanel.add(continueBtn);
+        menuPanel.add(Box.createVerticalStrut(18));
+        menuPanel.add(exitBtn);
+    }
+
+    private JLabel createFormLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setForeground(Color.WHITE);
+        label.setFont(new Font("微软雅黑", Font.PLAIN, 15));
+        return label;
+    }
+
+    private void styleInput(JTextField field) {
+        Dimension inputSize = new Dimension(180, 34);
+        field.setPreferredSize(inputSize);
+        field.setMinimumSize(inputSize);
+        field.setMaximumSize(inputSize);
+        field.setBackground(new Color(255, 255, 255, 235));
+        field.setForeground(Color.BLACK);
+        field.setCaretColor(Color.BLACK);
+        field.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(110, 137, 187)),
+                BorderFactory.createEmptyBorder(6, 8, 6, 8)));
+    }
+
+    private void switchToRegisterMode() {
+        registerMode = true;
+        confirmPasswordField.setVisible(true);
+        confirmPasswordLabel.setVisible(true);
+        registerBtn.setText("确认注册");
+        loginBtn.setText("返回登录");
+        loginPanel.revalidate();
+        loginPanel.repaint();
+    }
+
+    private void switchToLoginMode() {
+        registerMode = false;
+        confirmPasswordField.setVisible(false);
+        confirmPasswordLabel.setVisible(false);
+        confirmPasswordField.setText("");
+        registerBtn.setText("注册");
+        loginBtn.setText("登录");
+        loginPanel.revalidate();
+        loginPanel.repaint();
+    }
+
+    private void stylePrimaryButton(JButton button) {
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createEmptyBorder(8, 18, 8, 18));
+        button.setBackground(new Color(79, 129, 219));
+        button.setForeground(Color.WHITE);
+        button.setFont(new Font("微软雅黑", Font.BOLD, 14));
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    }
+
+    private JButton createMenuButton(String text) {
+        JButton button = new JButton(text);
+        button.setAlignmentX(CENTER_ALIGNMENT);
+        button.setHorizontalAlignment(SwingConstants.CENTER);
+        button.setMaximumSize(new Dimension(120, 34));
+        button.setPreferredSize(new Dimension(120, 34));
+        button.setMinimumSize(new Dimension(120, 34));
+        button.setOpaque(false);
+        button.setContentAreaFilled(false);
+        button.setBorderPainted(false);
+        button.setFocusPainted(false);
+        button.setForeground(Color.WHITE);
+        button.setFont(new Font("微软雅黑", Font.BOLD, 21));
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        return button;
+    }
+
     private void onRegister() {
         String username = usernameField.getText().trim();
         String pwd1 = new String(passwordField.getPassword());
         String pwd2 = new String(confirmPasswordField.getPassword());
+
         if (username.isEmpty() || pwd1.isEmpty() || pwd2.isEmpty()) {
             showMsg("请填写完整信息！");
             return;
@@ -188,15 +268,16 @@ public class LoginFrame extends JFrame {
             showMsg("用户名已存在！");
             return;
         }
+
         dataManager.addAccount(username, pwd1);
         showMsg("注册成功，请登录！");
-        confirmPasswordField.setText("");
+        switchToLoginMode();
     }
 
-    // 登录逻辑
     private void onLogin() {
         String username = usernameField.getText().trim();
         String pwd = new String(passwordField.getPassword());
+
         if (username.isEmpty() || pwd.isEmpty()) {
             showMsg("请输入用户名和密码！");
             return;
@@ -205,106 +286,135 @@ public class LoginFrame extends JFrame {
             showMsg("用户名或密码错误！");
             return;
         }
+
         currentUser = username;
         showMsg("登录成功！");
         switchToMenu();
     }
 
-    // 切换到主菜单
     private void switchToMenu() {
-        usernameField.setVisible(false);
-        passwordField.setVisible(false);
-        confirmPasswordField.setVisible(false);
-        loginBtn.setVisible(false);
-        registerBtn.setVisible(false);
+        menuMode = true;
+        remove(loginPanel);
+        loginPanel = null;
         menuPanel.setVisible(true);
+        repaintBackgroundWindow();
+        revalidate();
+        repaint();
     }
 
-    // 新的游戏
-    private void onNewGame() {
-        if (currentUser == null) return;
-        if (dataManager.saveExists(currentUser)) {
-            int res = JOptionPane.showConfirmDialog(this,
-                    "已有存档，是否覆盖？", "提示", JOptionPane.YES_NO_OPTION);
-            if (res != JOptionPane.YES_OPTION) return;
+    private void repaintBackgroundWindow() {
+        Window window = SwingUtilities.getWindowAncestor(menuPanel);
+        if (window != null) {
+            window.repaint();
         }
+    }
+
+    private void onNewGame() {
+        if (currentUser == null) {
+            return;
+        }
+
+        if (dataManager.saveExists(currentUser)) {
+            int result = JOptionPane.showConfirmDialog(
+                    this,
+                    "已有存档，是否覆盖？",
+                    "提示",
+                    JOptionPane.YES_NO_OPTION);
+            if (result != JOptionPane.YES_OPTION) {
+                return;
+            }
+        }
+
         PlayerSave save = new PlayerSave(currentUser);
         dataManager.savePlayerSave(currentUser, save);
         showMsg("新存档已创建，进入游戏！");
         enterGame(save);
     }
 
-    // 继续游戏
     private void onContinueGame() {
-        if (currentUser == null) return;
-        PlayerSave save = dataManager.loadPlayerSave(currentUser);
-        if (save == null) {
-            showMsg("没有存档，请先开始新游戏！");
+        if (currentUser == null) {
             return;
         }
-        showMsg("加载存档成功，进入游戏！");
+
+        PlayerSave save = dataManager.loadPlayerSave(currentUser);
+        if (save == null) {
+            showMsg("没有存档，请先开始新的游戏！");
+            return;
+        }
+
+        showMsg("读取存档成功，进入游戏！");
         enterGame(save);
     }
 
-    // 进入游戏主场景（与现有框架衔接）
-    // 进入游戏主场景（与现有框架衔接）
     private void enterGame(PlayerSave save) {
-        // 【核心截胡】：在进入游戏前，直接把存档塞进 GameLoad 的静态口袋里！
         com.tedu.manager.GameLoad.currentSave = save;
-        
-        // 登录窗口关闭
-        this.dispose();
-        // 回调通知GameStart
+        dispose();
         if (loginSuccessListener != null) {
             loginSuccessListener.onLoginSuccess(save);
         }
     }
 
-    // 消息弹窗
     private void showMsg(String msg) {
         JOptionPane.showMessageDialog(this, msg);
     }
 
-    // 背景面板（可自定义背景图）
-    static class BgPanel extends JPanel {
-        private Image bg;
-        public BgPanel() {
-            // 可替换为你的背景图片路径
+    private class BgPanel extends JPanel {
+        private final Image bg;
+
+        BgPanel() {
+            Image image;
             try {
-                bg = Toolkit.getDefaultToolkit().createImage("image/login/login_bg.png");
+                image = Toolkit.getDefaultToolkit().createImage("image/login/login_bg.png");
             } catch (Exception e) {
-                bg = null;
+                image = null;
             }
+            this.bg = image;
         }
+
+        @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
             if (bg != null) {
-                g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+                g2.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+            } else {
+                g2.setColor(Color.BLACK);
+                g2.fillRect(0, 0, getWidth(), getHeight());
             }
-            
-            // 绘制深灰色圆角矩形区域来突出显示登录表单
-            Graphics2D g2d = (Graphics2D) g.create();
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); // 启用抗锯齿
-            
-            // 绘制深灰色圆角矩形背景
-            g2d.setColor(new Color(64, 64, 64)); // 深灰色
-            g2d.fillRoundRect(230, 130, 340, 260, 20, 20); // x, y, width, height, arcWidth, arcHeight
-            
-            // 绘制顶部黑色标题栏
-            g2d.setColor(Color.BLACK);
-            g2d.fillRoundRect(230, 130, 340, 30, 20, 20); // 黑色标题栏，高度30
-            
-            // 在黑色标题栏中绘制白色文字
-            g2d.setColor(Color.WHITE);
-            g2d.setFont(new Font("微软雅黑", Font.BOLD, 12));
-            FontMetrics fm = g2d.getFontMetrics();
-            String text = "本游戏必须登录才能进行游戏及保存存档";
-            int textWidth = fm.stringWidth(text);
-            int textX = 230 + (340 - textWidth) / 2; // 水平居中
-            int textY = 130 + (30 + fm.getAscent()) / 2 - 2; // 垂直居中
-            g2d.drawString(text, textX, textY);
-            
-            g2d.dispose();
+
+            if (!menuMode) {
+                drawLoginBoard(g2);
+            } else {
+                drawMenuBoard(g2);
+            }
+
+            g2.dispose();
+        }
+
+        private void drawLoginBoard(Graphics2D g2) {
+            g2.setColor(new Color(52, 58, 72, 215));
+            g2.fillRoundRect(230, 130, 340, 260, 24, 24);
+
+            g2.setColor(new Color(14, 14, 14, 235));
+            g2.fillRoundRect(230, 130, 340, 34, 24, 24);
+            g2.fillRect(230, 148, 340, 16);
+
+            g2.setColor(Color.WHITE);
+            g2.setFont(new Font("微软雅黑", Font.BOLD, 12));
+            FontMetrics fm = g2.getFontMetrics();
+            String tip = "本游戏必须登录后才能进行游戏及保存存档";
+            int textX = 230 + (340 - fm.stringWidth(tip)) / 2;
+            int textY = 130 + (34 + fm.getAscent()) / 2 - 2;
+            g2.drawString(tip, textX, textY);
+        }
+
+        private void drawMenuBoard(Graphics2D g2) {
+            g2.setColor(new Color(0, 0, 0, 210));
+            g2.fillRoundRect(595, 130, 170, 360, 16, 16);
+            g2.setColor(new Color(255, 255, 255, 45));
+            g2.drawRoundRect(595, 130, 170, 360, 16, 16);
         }
     }
 }
