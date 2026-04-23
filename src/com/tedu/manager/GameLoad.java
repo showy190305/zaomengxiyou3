@@ -2,7 +2,6 @@ package com.tedu.manager;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -12,245 +11,340 @@ import java.util.Set;
 
 import javax.swing.ImageIcon;
 
+import com.tedu.element.ArmorItem;
+import com.tedu.element.BloodPotion;
 import com.tedu.element.ElementObj;
+import com.tedu.element.Inventory;
+import com.tedu.element.ManaPotion;
+import com.tedu.element.StaffItem;
+import com.tedu.element.WuKong;
 
 /**
  * 游戏资源加载器工具类
  * 提供静态方法用于加载地图、图片、玩家等游戏资源
- * 通过配置文件实现游戏资源的动态加载和管理
- * @author renjj
  */
 public class GameLoad {
-	/**
-	 * 游戏元素管理器单例实例
-	 * 用于管理游戏中所有元素对象的添加和维护
-	 */
-	private static ElementManager em=ElementManager.getManager();
-	
-	/**
-	 * 图片资源映射表
-	 * 键为图片标识符，值为对应的ImageIcon对象
-	 */
-	public static Map<String,ImageIcon> imgMap = new HashMap<>();
-	
-	/**
-	 * 多帧图片序列映射表
-	 * 键为图片标识符，值为ImageIcon列表（用于动画）
-	 */
-	public static Map<String,List<ImageIcon>> imgMaps;
+    // 【防报错临时注释】：等待组员完成 PlayerSave 类后解开
+    
+    public static com.tedu.login.PlayerSave currentSave = null;
+    
+    
+    private static ElementManager em = ElementManager.getManager();
+    public static Map<String,ImageIcon> imgMap = new HashMap<>();
+    public static Map<String,List<ImageIcon>> imgMaps;
+    private static Properties pro = new Properties();    
 
-	/**
-	 * 属性文件读取器
-	 * 用于读取和解析配置文件
-	 */
-	private static Properties pro =new Properties();	
-	/**
-	 * 根据地图ID加载对应的地图配置文件
-	 * 从配置文件中读取地图元素信息并创建相应的游戏对象
-	 * @param mapId 地图编号，用于确定配置文件名称
-	 */
-	public static void MapLoad(int mapId) {
-		// 根据地图ID构建配置文件路径
-		String mapName="com/tedu/text/"+mapId+".map";
-		// 获取类加载器，用于读取资源文件
-		ClassLoader classLoader = GameLoad.class.getClassLoader();
-		// 从类路径下获取地图配置文件的输入流
-		InputStream maps = classLoader.getResourceAsStream(mapName);
-		// 检查配置文件是否存在
-		if(maps ==null) {
-			System.out.println("配置文件读取异常,请重新安装");
-			return;
-		}
-		try {
-			// 清空之前的配置信息
-			pro.clear();
-			// 从输入流加载属性配置
-			pro.load(maps);
-			// 获取所有属性键的枚举
-			Enumeration<?> names = pro.propertyNames();
-			// 遍历所有属性键值对
-			while(names.hasMoreElements()) {
-				// 获取当前属性键
-				String key=names.nextElement().toString();
-				System.out.println(pro.getProperty(key));
-				// 解析属性值，按分号分割多个地图元素
-				String [] arrs=pro.getProperty(key).split(";");
-				// 遍历所有地图元素数据
-				for(int i=0;i<arrs.length;i++) {
-					// 获取地图元素对象工厂
-					ElementObj obj=getObj("map");  
-					// 创建具体的地图元素对象
-					ElementObj element = obj.createElement(key+","+arrs[i]);
-					System.out.println(element);
-					// 将创建的地图元素添加到元素管理器中
-					em.addElement(element, GameElement.MAPS);
-				}
-			}	
-		} catch (IOException e) {
-			// 捕获并打印IO异常
-			e.printStackTrace();
-		}
-	}
-	/**
-	 * 加载游戏所需的所有图片资源
-	 * 从配置文件中读取图片路径并创建ImageIcon对象缓存
-	 */
-	public static void loadImg() {
-		// 可以带参数，因为不同的关卡也可能需要不一样的图片资源
-		// 定义图片资源配置文件路径
-		String texturl="com/tedu/text/GameData.pro";
-		// 获取类加载器用于读取资源文件
-		ClassLoader classLoader = GameLoad.class.getClassLoader();
-		// 获取图片资源配置文件的输入流
-		InputStream texts = classLoader.getResourceAsStream(texturl);
-		// 清空之前的配置信息
-		pro.clear();
-		try {
-			// 从输入流加载图片路径配置
-			pro.load(texts);
-			// 获取所有图片标识符的集合
-			Set<Object> set = pro.keySet();
-			// 遍历所有图片标识符
-			for(Object o:set) {
-				// 获取当前图片的文件路径
-				String url=pro.getProperty(o.toString());
-				// 创建ImageIcon对象并存储到图片映射表中
-				imgMap.put(o.toString(), new ImageIcon(url));
-			}
-			
-		} catch (IOException e) {
-			// 捕获并打印IO异常
-			e.printStackTrace();
-		}
-	}
-	/**
-	 * 加载玩家对象
-	 * 创建初始玩家对象并添加到游戏元素管理器中
-	 */
-	public static void loadPlay() {
-		// 加载对象映射关系
-		loadObj();
-		// 定义玩家初始位置和类型的字符串参数（暂时硬编码，未放入配置文件）
-		String playStr="200,200,paopao";
-		// 通过字符串标识获取对应的元素对象工厂
-		ElementObj obj=getObj("paopao");
-		// 这个字符串是key，也是唯一id，相当于为每个类起了一个唯一的id名称
-		// 这个字符串名称一定要和obj.pro中的key相同
-		// 根据字符串参数创建具体的玩家对象
-		ElementObj play = obj.createElement(playStr);
-		// ElementObj play = new Play().createElement(playStr);
-		// 解耦，降低代码和代码之间的耦合度，可以通过接口或抽象父类获取实体对象
-		// 通过配置文件的耦合，降低代码的耦合度
-		// 将创建的玩家对象添加到元素管理器中
-		em.addElement(play, GameElement.PLAY);
-	}
-	
-	/**
-	 * 根据字符串标识获取对应的元素对象实例
-	 * 使用反射机制创建指定类型的ElementObj实例
-	 * @param str 元素类型标识符
-	 * @return 对应的ElementObj实例，如果创建失败则返回null
-	 */
-	public static ElementObj getObj(String str) {
-		try {
-			// 从对象映射表中获取指定标识符对应的类
-			Class<?> class1 = objMap.get(str);
-			// 使用反射创建类的新实例
-			Object newInstance = class1.newInstance();
-			// 检查创建的对象是否为ElementObj的实例
-			if(newInstance instanceof ElementObj) {
-				// 返回转换后的ElementObj实例
-				return (ElementObj)newInstance;   //这个对象就和 new Play()等价
-//				新建立啦一个叫  GamePlay的类
-			}
-		} catch (InstantiationException e) {
-			// 捕获并打印实例化异常
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// 捕获并打印非法访问异常
-			e.printStackTrace();
-		}
-		// 如果创建失败，返回null
-		return null;
-	}
-	
-	/**
-	 * 对象类型映射表
-	 * 键为对象标识符字符串，值为对应的Class对象
-	 * 用于通过字符串标识符动态创建对象实例
-	 */
-	private static Map<String,Class<?>> objMap=new HashMap<>();
-	
-	/**
-	 * 加载对象类型映射关系
-	 * 从配置文件中读取类名映射，建立字符串标识符与Class对象的关联
-	 */
-	public static void loadObj() {
-		// 定义对象类型配置文件路径
-		String texturl="com/tedu/text/obj.pro";
-		// 获取类加载器用于读取配置文件
-		ClassLoader classLoader = GameLoad.class.getClassLoader();
-		// 获取对象类型配置文件的输入流
-		InputStream texts = classLoader.getResourceAsStream(texturl);
-		// 清空之前的配置信息
-		pro.clear();
-		try {
-			// 从输入流加载对象类型配置
-			pro.load(texts);
-			// 获取所有对象标识符的集合
-			Set<Object> set = pro.keySet();
-			// 遍历所有对象标识符
-			for(Object o:set) {
-				// 获取当前标识符对应的类全名
-				String classUrl=pro.getProperty(o.toString());
-//				使用反射的方式直接将 类进行获取
-				// 使用反射加载指定的类
-				Class<?> forName = Class.forName(classUrl);
-				// 将标识符与Class对象的映射关系存储到映射表中
-				objMap.put(o.toString(), forName);
-			}
-			
-		} catch (IOException e) {
-			// 捕获并打印IO异常
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// 捕获并打印类找不到异常
-			e.printStackTrace();
-		}
-	}
-	
-	
-	
-//	用于测试
-	public static void main(String[] args) {
-		MapLoad(5);
-		
-		
-		try {
-//			通过类路径名称， com.tedu.Play
-			Class<?> forName = Class.forName("");
-//			通过类名  可以直接访问到这个类
-			Class<?> forName1=GameLoad.class;
-//			通过实体对象 获取 反射对象
-			GameLoad gameLoad = new GameLoad();
-			Class<? extends GameLoad> class1 = gameLoad.getClass();
-			
-			
-			
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+    // ================== 你的新地图逻辑 ==================
+    /**
+     * 根据地图ID加载对应地图
+     * @param mapId 地图编号 (1-3)
+     */
+    public static void loadMap(int mapId) {
+        ElementObj map;
+        switch(mapId) {
+            case 1:
+                map = new com.tedu.element.map.MapObj1();
+                break;
+            case 2:
+                map = new com.tedu.element.map.MapObj2();
+                break;
+            case 3:
+                map = new com.tedu.element.map.MapObj3();
+                break;
+            default:
+                // 默认加载地图3
+                map = new com.tedu.element.map.MapObj3();
+                System.out.println("无效地图ID，加载默认地图");
+                break;
+        }
+        // 放进 MAPS 集合中
+        em.addElement(map, GameElement.MAPS);
+        System.out.println("地图" + mapId + "加载完毕！");
+    }
+    // ====================================================
+
+    // 老的网格地图加载法 (保留给你队友留底，不用管它)
+    public static void MapLoad(int mapId) {
+        String mapName = "com/tedu/text/" + mapId + ".map";
+        ClassLoader classLoader = GameLoad.class.getClassLoader();
+        InputStream maps = classLoader.getResourceAsStream(mapName);
+        if (maps == null) {
+            System.out.println("配置文件读取异常,请重新安装");
+            return;
+        }
+        try {
+            pro.clear();
+            pro.load(maps);
+            Enumeration<?> names = pro.propertyNames();
+            while (names.hasMoreElements()) {
+                String key = names.nextElement().toString();
+                String[] arrs = pro.getProperty(key).split(";");
+                for (int i = 0; i < arrs.length; i++) {
+                    ElementObj obj = getObj("map");  
+                    ElementObj element = obj.createElement(key + "," + arrs[i]);
+                    em.addElement(element, GameElement.MAPS);
+                }
+            }   
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void loadImg() {
+        String texturl = "com/tedu/text/GameData.pro";
+        ClassLoader classLoader = GameLoad.class.getClassLoader();
+        InputStream texts = classLoader.getResourceAsStream(texturl);
+        
+        // 防空指针保护
+        if (texts == null) {
+            System.out.println("未找到图片配置文件: " + texturl);
+            return;
+        }
+        
+        pro.clear();
+        try {
+            pro.load(texts);
+            Set<Object> set = pro.keySet();
+            for (Object o : set) {
+                String url = pro.getProperty(o.toString());
+                imgMap.put(o.toString(), new ImageIcon(url));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 加载玩家、武器与怪物
+     */
+    public static void loadPlay() {
+        loadPlay(1);  // 默认加载第1关
+        
+    }
+    
+    public static void loadPlay(int levelIndex) {
+        // ==========================================================
+        // 【新增】：根据关卡 ID 播放专属 BGM
+        // ==========================================================
+        String[] levelBGMs = {
+            "audio/bgm_level1.wav", // 第一关音乐
+            "audio/bgm_level2.wav", // 第二关音乐
+            "audio/bgm_level3.wav"  // 第三关音乐
+        };
+        if (levelIndex >= 1 && levelIndex <= 3) {
+            com.tedu.manager.SoundManager.playBGM(levelBGMs[levelIndex - 1]);
+        }
+        // ==========================================================
+        // 先加载对象映射，防止反射失败
+        loadObj();
+
+        // 根据关卡确定角色初始位置
+        String initialPos = getInitialPositionForLevel(levelIndex);
+        
+        // 1. 加载大圣
+        ElementObj wukong = new com.tedu.element.WuKong();
+        wukong.createElement(initialPos); 
+        
+        // 【防报错临时注释】：等待组员完成 PlayerSave 类后解开
+        
+        if (currentSave != null) {
+            ((com.tedu.element.WuKong) wukong).loadFromSave(currentSave);
+        }
+        
+        em.addElement(wukong, GameElement.PLAY);
+        Inventory inventory = Inventory.getInstance();
+        // 初始空背包，装备需要通过击败Boss获得
+        if (inventory.getItems().isEmpty() && inventory.getEquippedWeapon() == null && inventory.getEquippedArmor() == null) {
+            // 初始只给少量药水
+            inventory.addItem(new BloodPotion());
+            inventory.addItem(new BloodPotion());
+            inventory.addItem(new ManaPotion());
+        }
+
+        // 确保状态被重置为满血满蓝
+        java.util.List<com.tedu.element.ElementObj> list = 
+            com.tedu.manager.ElementManager.getManager().getElementsByKey(com.tedu.manager.GameElement.PLAY);
+            
+        for (com.tedu.element.ElementObj obj : list) {
+            if (obj instanceof com.tedu.element.WuKong) {
+                ((com.tedu.element.WuKong) obj).resetStatus();
+            }
+        }
+
+        // 2. 加载武器
+        ElementObj weapon = new com.tedu.element.Weapon();
+        weapon.createElement(initialPos);
+        em.addElement(weapon, GameElement.PLAY);
+
+        // ==========================================================
+        // 3. 【优化】：关卡怪物配置表 (X坐标, 怪物数量)
+        // 为不同关卡配置不同的怪物分布
+        // ==========================================================
+        EnemySpawnConfig[] spawnConfig = getMonsterSpawnConfigForLevel(levelIndex);
+
+        for (int i = 0; i < spawnConfig.length; i++) {
+            int spawnX = spawnConfig[i].x;
+            int count = spawnConfig[i].count;
+            String enemyType = spawnConfig[i].type;
+            
+            for (int j = 0; j < count; j++) {
+                ElementObj enemy = createEnemyByType(enemyType);
+                // 给同批次的怪物加上偏移量 (j * 80)，防止它们完美重叠在一起
+                int finalX = spawnX + (j * 80);
+                enemy.createElement(finalX + ",400,150,150");
+                em.addElement(enemy, GameElement.ENEMY);
+            }
+        }
+        
+        System.out.println("关卡" + levelIndex + "怪物已按配置表部署完毕！");
+    }
+    
+    // 根据关卡获取角色初始位置
+    private static String getInitialPositionForLevel(int levelIndex) {
+        switch(levelIndex) {
+            case 1:
+                return "100,400,150,150";  // 龙宫地图初始位置
+            case 2:
+                return "100,400,150,150";  // 天宫岛初始位置
+            case 3:
+                return "100,400,150,150";  // 南天门初始位置
+            default:
+                return "100,400,150,150";  // 默认位置
+        }
+    }
+    
+    // 定义敌人生成配置类
+    private static class EnemySpawnConfig {
+        int x;          // 生成X坐标
+        int count;      // 生成数量
+        String type;    // 敌人类型
+        
+        public EnemySpawnConfig(int x, int count, String type) {
+            this.x = x;
+            this.count = count;
+            this.type = type;
+        }
+    }
+    
+    // 根据关卡获取怪物生成配置
+    private static EnemySpawnConfig[] getMonsterSpawnConfigForLevel(int levelIndex) {
+        switch(levelIndex) {
+            case 1:
+                // 龙宫地图怪物配置，使用enemy3
+                return new EnemySpawnConfig[] {
+                    new EnemySpawnConfig(500,  2, "enemy2"),  // 第一波：X=800处，2只enemy3（新手热身）
+                    new EnemySpawnConfig(1000, 3, "enemy2"),  // 第二波：X=2000处，3只enemy3
+                    new EnemySpawnConfig(2000, 2, "enemy2"),  // 第三波：X=3800处，2只enemy3
+                    new EnemySpawnConfig(3000, 4, "enemy2"),  // 第四波：X=5500处，4只enemy3（小高潮）
+                    new EnemySpawnConfig(4000, 5, "enemy2")   // 第五波：X=7500处，5只enemy3（关底大决战）
+                };
+            case 2:
+                // 天宫岛怪物配置，使用enemy4
+                return new EnemySpawnConfig[] {
+                    new EnemySpawnConfig(500,  2, "enemy3"),  // 第一波：X=800处，2只enemy3（新手热身）
+                    new EnemySpawnConfig(1000, 3, "enemy3"),  // 第二波：X=2000处，3只enemy3
+                    new EnemySpawnConfig(2000, 2, "enemy3"),  // 第三波：X=3800处，2只enemy3
+                    new EnemySpawnConfig(3000, 3, "enemy3"),  // 第四波：X=5500处，4只enemy3（小高潮）
+                    new EnemySpawnConfig(4000, 4, "enemy3"),   // 第五波：X=7500处，5只enemy3（关底大决战）
+                    new EnemySpawnConfig(700,  2, "enemy4"),  // 第一波：X=800处，3只enemy4
+                    new EnemySpawnConfig(1200, 2, "enemy4"),  // 第二波：X=2200处，2只enemy4
+                    new EnemySpawnConfig(2200, 3, "enemy4"),  // 第三波：X=3500处，4只enemy4
+                    new EnemySpawnConfig(3200, 2, "enemy4"),  // 第四波：X=5000处，3只enemy4
+                    new EnemySpawnConfig(3800, 4, "enemy4"),   // 第五波：X=6800处，5只enemy4
+                    new EnemySpawnConfig(4400, 1, "boss1")
+                };
+            case 3:
+                // 南天门怪物配置，使用enemy5
+                return new EnemySpawnConfig[] {
+                    new EnemySpawnConfig(500,  2, "enemy3"),  // 第一波：X=800处，2只enemy3（新手热身）
+                    new EnemySpawnConfig(1000, 3, "enemy3"),  // 第二波：X=2000处，3只enemy3
+                    new EnemySpawnConfig(2000, 2, "enemy3"),  // 第三波：X=3800处，2只enemy3
+                    new EnemySpawnConfig(3000, 2, "enemy3"),  // 第四波：X=5500处，4只enemy3（小高潮）
+                    new EnemySpawnConfig(4000, 3, "enemy3"),   // 第五波：X=7500处，5只enemy3（关底大决战）
+                    new EnemySpawnConfig(700,  2, "enemy4"),  // 第一波：X=800处，3只enemy4
+                    new EnemySpawnConfig(1200, 2, "enemy4"),  // 第二波：X=2200处，2只enemy4
+                    new EnemySpawnConfig(2200, 2, "enemy4"),  // 第三波：X=3500处，4只enemy4
+                    new EnemySpawnConfig(3200, 2, "enemy4"),  // 第四波：X=5000处，3只enemy4
+                    new EnemySpawnConfig(3800, 3, "enemy4"),   // 第五波：X=6800处，5只enemy4
+                    new EnemySpawnConfig(600,  2, "enemy5"),  // 第一波：X=600处，2只enemy5
+                    new EnemySpawnConfig(1500, 3, "enemy5"),  // 第二波：X=1800处，3只enemy5
+                    new EnemySpawnConfig(2500, 2, "enemy5"),  // 第三波：X=3200处，2只enemy5
+                    new EnemySpawnConfig(3500, 4, "enemy5"),  // 第四波：X=4800处，4只enemy5
+                    new EnemySpawnConfig(4400, 1, "boss2")
+                };
+            default:
+                // 默认怪物配置，使用enemy2
+                return new EnemySpawnConfig[] {
+                    new EnemySpawnConfig(800,  2, "enemy2"),  // 第一波：X=800处，2只enemy2（新手热身）
+                    new EnemySpawnConfig(2000, 3, "enemy2"),  // 第二波：X=2000处，3只enemy2
+                    new EnemySpawnConfig(3800, 2, "enemy2"),  // 第三波：X=3800处，2只enemy2
+                    new EnemySpawnConfig(5500, 4, "enemy2"),  // 第四波：X=5500处，4只enemy2（小高潮）
+                    new EnemySpawnConfig(7500, 5, "enemy2")   // 第五波：X=7500处，5只enemy2（关底大决战）
+                };
+        }
+    }
+    
+    // 根据类型创建敌人实例
+    private static ElementObj createEnemyByType(String enemyType) {
+        switch(enemyType) {
+            case "boss1":
+                return new com.tedu.element.enemy.boss1();
+            case "boss2":
+                return new com.tedu.element.enemy.boss2(); 
+            case "enemy2":
+                return new com.tedu.element.enemy.enemy2();
+            case "enemy3":
+                return new com.tedu.element.enemy.enemy3();
+            case "enemy4":
+                return new com.tedu.element.enemy.enemy4();
+            case "enemy5":
+                return new com.tedu.element.enemy.enemy5();
+            default:
+                return new com.tedu.element.enemy.enemy2(); // 默认返回enemy2
+        }
+    }
+    
+    public static ElementObj getObj(String str) {
+        try {
+            Class<?> class1 = objMap.get(str);
+            if (class1 == null) {
+                System.out.println("无法通过反射找到类: " + str);
+                return null;
+            }
+            Object newInstance = class1.newInstance();
+            if (newInstance instanceof ElementObj) {
+                return (ElementObj) newInstance;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    private static Map<String,Class<?>> objMap = new HashMap<>();
+    
+    public static void loadObj() {
+        String texturl = "com/tedu/text/obj.pro";
+        ClassLoader classLoader = GameLoad.class.getClassLoader();
+        InputStream texts = classLoader.getResourceAsStream(texturl);
+        if (texts == null) {
+            System.out.println("未找到对象映射配置文件: " + texturl);
+            return;
+        }
+        pro.clear();
+        try {
+            pro.load(texts);
+            Set<Object> set = pro.keySet();
+            for (Object o : set) {
+                String classUrl = pro.getProperty(o.toString());
+                Class<?> forName = Class.forName(classUrl);
+                objMap.put(o.toString(), forName);
+            }
+        } catch (Exception e) {
+            System.out.println("加载 obj.pro 反射映射失败: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    public static void main(String[] args) {}
 }
